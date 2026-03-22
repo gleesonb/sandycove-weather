@@ -114,6 +114,21 @@ export interface RainAlarm {
   minutesToRain: number | null;
 }
 
+export interface SeaConditions {
+  seaTemp: number;
+  waveHeight: number;
+  wavePeriod: number;
+  waveDirection: number;
+  tides: TideEvent[];
+  fetchedAt: string;
+}
+
+export interface TideEvent {
+  type: "high" | "low";
+  time: string;
+  height: number;
+}
+
 /** Cache TTLs in seconds */
 export const CACHE_TTL = {
   current: 300, // 5 min
@@ -123,4 +138,5 @@ export const CACHE_TTL = {
   historyPast: 86400, // 24h
   historyToday: 900, // 15 min
   rainalarm: 300, // 5 min
+  sea: 1800, // 30 min
 } as const;

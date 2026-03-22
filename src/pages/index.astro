@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import App from "../components/App";
 import DarkModeToggle from "../components/DarkModeToggle";
+import NotificationToggle from "../components/NotificationToggle";
 ---
 
 <html lang="en">
@@ -50,7 +51,10 @@ import DarkModeToggle from "../components/DarkModeToggle";
           <h1 class="font-display text-2xl font-semibold tracking-tight">Sandycove Weather</h1>
           <p class="text-ocean-200 dark:text-ocean-400 text-sm mt-0.5">Dublin, Ireland &middot; Live from Station IDNLAO16</p>
         </div>
-        <DarkModeToggle client:load />
+        <div class="flex items-center gap-1">
+          <NotificationToggle client:load />
+          <DarkModeToggle client:load />
+        </div>
       </div>
     </header>
     <main class="max-w-4xl mx-auto px-4 py-8">

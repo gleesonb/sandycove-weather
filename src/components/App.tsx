@@ -2,6 +2,8 @@ import QueryProvider from "./QueryProvider";
 import WarningBanner from "./WarningBanner";
 import RainAlarm from "./RainAlarm";
 import CurrentConditions from "./CurrentConditions";
+import SeaConditions from "./SeaConditions";
+import SwimIndicator from "./SwimIndicator";
 import TodayCharts from "./TodayCharts";
 import HourlyForecast from "./HourlyForecast";
 import DailyForecast from "./DailyForecast";
@@ -16,6 +18,13 @@ export default function App() {
         <WarningBanner />
         <RainAlarm />
         <CurrentConditions />
+
+        <SwimIndicator />
+
+        <section>
+          <h2 className="section-title">Sea Conditions</h2>
+          <SeaConditions />
+        </section>
 
         <section>
           <h2 className="section-title">Today</h2>
