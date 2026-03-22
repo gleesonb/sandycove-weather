@@ -228,22 +228,28 @@ export default function SwimIndicator() {
     });
   }
 
-  // Next tide info
+  // Tide state
   if (sea?.tides && sea.tides.length > 0) {
+    const tideLabel = tideResult?.label || "Mid-tide";
     const now = Date.now();
     const nextTide = sea.tides.find((t) => new Date(t.time).getTime() > now);
-    if (nextTide) {
-      const tideTime = new Date(nextTide.time).toLocaleTimeString("en-IE", {
-        timeZone: "Europe/Dublin",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      breakdownItems.push({
-        emoji: nextTide.type === "high" ? "⬆️" : "⬇️",
-        label: `${nextTide.type === "high" ? "High" : "Low"} tide`,
-        detail: `${tideTime} (${nextTide.height.toFixed(1)}m)`,
-      });
-    }
+    const tideDetail = nextTide
+      ? `${tideLabel} · Next ${nextTide.type === "high" ? "high" : "low"} at ${new Date(nextTide.time).toLocaleTimeString("en-IE", { timeZone: "Europe/Dublin", hour: "2-digit", minute: "2-digit" })}`
+      : tideLabel;
+    const tideEmoji = tideLabel.includes("high") || tideLabel.includes("High")
+      ? "⬆️"
+      : tideLabel.includes("low") || tideLabel.includes("Low")
+        ? "⬇️"
+        : tideLabel.includes("coming") || tideLabel.includes("approaching")
+          ? "↗️"
+          : tideLabel.includes("going") || tideLabel.includes("out")
+            ? "↘️"
+            : "🌊";
+    breakdownItems.push({
+      emoji: tideEmoji,
+      label: "Tide",
+      detail: tideDetail,
+    });
   }
 
   return (

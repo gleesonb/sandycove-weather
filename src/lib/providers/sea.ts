@@ -1,11 +1,9 @@
-/** Sea conditions provider: Open-Meteo Marine API + tidetimes.org.uk scraping */
+/** Sea conditions provider: Open-Meteo Marine API + Marine Institute ERDDAP tides */
 
 import type { SeaConditions, TideEvent } from "@/lib/types";
 
 const MARINE_URL =
   "https://marine-api.open-meteo.com/v1/marine?latitude=53.29&longitude=-6.12&current=sea_surface_temperature,wave_height,wave_period,wave_direction&timezone=Europe/Dublin";
-
-const TIDES_URL = "https://www.tidetimes.org.uk/dun-laoghaire-tide-times";
 
 interface MarineResponse {
   current?: {
@@ -13,6 +11,12 @@ interface MarineResponse {
     wave_height?: number;
     wave_period?: number;
     wave_direction?: number;
+  };
+}
+
+interface ErddapResponse {
+  table: {
+    rows: [string, number, string][];
   };
 }
 
@@ -39,55 +43,43 @@ export async function fetchMarineData(): Promise<{
 }
 
 export async function fetchTides(): Promise<TideEvent[]> {
-  const res = await fetch(TIDES_URL, {
-    headers: {
-      "User-Agent": "SandycoveWeather/1.0",
-    },
-  });
-  if (!res.ok) {
-    throw new Error(`Tides fetch failed: ${res.status} ${res.statusText}`);
-  }
-  const html = await res.text();
-
-  const tides: TideEvent[] = [];
-
-  // Build today's date string in Europe/Dublin timezone
+  // Use Marine Institute Ireland ERDDAP — Dublin Port high/low tide predictions
   const now = new Date();
-  const dublinDate = now.toLocaleDateString("en-CA", {
-    timeZone: "Europe/Dublin",
-  }); // YYYY-MM-DD
+  const startOfDay = new Date(now);
+  startOfDay.setUTCHours(0, 0, 0, 0);
+  const endOfTomorrow = new Date(now);
+  endOfTomorrow.setUTCDate(endOfTomorrow.getUTCDate() + 1);
+  endOfTomorrow.setUTCHours(23, 59, 59, 0);
 
-  // Match tide entries: look for patterns with High/Low, time (HH:MM), and height (X.XXm)
-  // tidetimes.org.uk uses structured HTML with tide info
-  // Pattern examples: "High Tide ... 03:42 ... 3.82m" or similar structures
-  const tidePattern =
-    /(High|Low)\s+Tide[^]*?(\d{1,2}:\d{2})[^]*?(\d+\.\d+)\s*m/gi;
-  let match;
+  const start = startOfDay.toISOString().replace(/\.\d+Z$/, "Z");
+  const end = endOfTomorrow.toISOString().replace(/\.\d+Z$/, "Z");
 
-  while ((match = tidePattern.exec(html)) !== null) {
-    const type = match[1].toLowerCase() as "high" | "low";
-    const timeStr = match[2];
-    const height = parseFloat(match[3]);
+  const url = `https://erddap.marine.ie/erddap/tabledap/IMI_TidePrediction_HighLow.json?time,Water_Level_ODMalin,tide_time_category&stationID=%22Dublin_Port%22&time%3E=${start}&time%3C=${end}&orderBy(%22time%22)`;
 
-    // Construct ISO timestamp
-    const isoTime = `${dublinDate}T${timeStr.padStart(5, "0")}:00`;
-    // Create a Date in Dublin timezone and convert to ISO
-    const dateObj = new Date(isoTime + "+00:00"); // Approximate; tide times are local
-    // For Dublin timezone, we store the local time as ISO for display purposes
-    tides.push({
-      type,
-      time: `${dublinDate}T${timeStr.padStart(5, "0")}:00.000Z`,
-      height,
-    });
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`ERDDAP tides failed: ${res.status} ${res.statusText}`);
   }
+  const data: ErddapResponse = await res.json();
 
-  return tides;
+  return data.table.rows.map((row) => {
+    // Water_Level_ODMalin is relative to Ordnance Datum Malin
+    // Convert to approximate chart datum by adding ~2.6m (Dun Laoghaire offset)
+    const heightOD = row[1];
+    const heightCD = heightOD + 2.6; // Approximate conversion to chart datum
+
+    return {
+      type: row[2] === "HIGH" ? "high" as const : "low" as const,
+      time: row[0],
+      height: Math.round(heightCD * 100) / 100,
+    };
+  });
 }
 
 export async function fetchSeaConditions(): Promise<SeaConditions> {
   const [marine, tides] = await Promise.all([
     fetchMarineData(),
-    fetchTides().catch(() => [] as TideEvent[]), // Tides are non-critical
+    fetchTides().catch(() => [] as TideEvent[]),
   ]);
 
   return {

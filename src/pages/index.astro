@@ -44,9 +44,10 @@ import NotificationToggle from "../components/NotificationToggle";
     </script>
   </head>
   <body class="min-h-screen">
-    <header class="relative overflow-hidden bg-gradient-to-br from-ocean-600 via-ocean-700 to-ocean-800 dark:from-ocean-900 dark:via-ocean-950 dark:to-gray-950 text-white py-5 px-6 shadow-lg transition-colors duration-300">
-      <div class="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]" style="background-image: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><path d=%22M0 30 Q15 20 30 30 Q45 40 60 30%22 fill=%22none%22 stroke=%22white%22 stroke-width=%221.5%22/></svg>'); background-size: 60px 60px;"></div>
-      <div class="relative max-w-4xl mx-auto flex items-center justify-between">
+    <header class="relative overflow-hidden text-white py-8 px-6 shadow-lg transition-colors duration-300">
+      <div class="absolute inset-0 bg-gradient-to-br from-ocean-700/90 via-ocean-800/85 to-ocean-900/90 dark:from-ocean-950/95 dark:via-ocean-950/90 dark:to-gray-950/95 z-[1]"></div>
+      <div class="absolute inset-0 z-0" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/f/f9/View_across_Scotsman%27s_Bay_to_the_Forty_Foot_at_Dalkey_-_geograph.org.uk_-_1973609.jpg'); background-size: cover; background-position: center 40%; filter: blur(1px);"></div>
+      <div class="relative z-[2] max-w-4xl mx-auto flex items-center justify-between">
         <div>
           <h1 class="font-display text-2xl font-semibold tracking-tight">Sandycove Weather</h1>
           <p class="text-ocean-200 dark:text-ocean-400 text-sm mt-0.5">Dublin, Ireland &middot; Live from Station IDNLAO16</p>
@@ -61,7 +62,7 @@ import NotificationToggle from "../components/NotificationToggle";
       <App client:load />
     </main>
     <footer class="border-t border-ocean-200/30 dark:border-ocean-800/30 text-center text-xs text-ocean-600/60 dark:text-ocean-200/30 py-6 px-4 transition-colors">
-      <p>Built by Niall Flynn with Astro + Cloudflare</p>
+      <p>Inspired by Niall Flynn &middot; Built with Astro + Cloudflare</p>
       <p class="mt-1">Data from Weather Underground &middot; Forecast from Met Eireann</p>
     </footer>
   </body>

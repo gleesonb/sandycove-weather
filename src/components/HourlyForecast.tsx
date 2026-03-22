@@ -66,7 +66,8 @@ export default function HourlyForecast() {
     );
   }
 
-  const { hourly } = data.data;
+  const now = new Date().toISOString();
+  const hourly = data.data.hourly.filter((h) => h.timestamp >= now);
 
   return (
     <div>
