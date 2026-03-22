@@ -1,0 +1,29 @@
+{
+  "name": "sandycove-weather",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "wrangler dev --config wrangler.deploy.toml",
+    "deploy": "astro build && wrangler deploy --config wrangler.deploy.toml",
+    "cf:migrate": "wrangler d1 execute sandycove-weather-db --remote --file=db/migrations/0001_create_observations.sql"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^13.1.3",
+    "@astrojs/react": "^5.0.1",
+    "@tailwindcss/vite": "^4.2.2",
+    "@tanstack/react-query": "^5.94.5",
+    "astro": "^6.0.8",
+    "fast-xml-parser": "^5.5.8",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "recharts": "^3.8.0",
+    "tailwindcss": "^4.2.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.76.0"
+  }
+}

@@ -1,0 +1,17 @@
+name = "sandycove-weather"
+compatibility_date = "2024-12-01"
+pages_build_output_dir = "./dist"
+
+[vars]
+STATION_ID = "IDNLAO16"
+LATITUDE = "53.2867"
+LONGITUDE = "-6.1179"
+
+[[kv_namespaces]]
+binding = "WEATHER_CACHE"
+id = "6bb90a30392943bb9f829b4caebe49b1"
+
+[[d1_databases]]
+binding = "WEATHER_DB"
+database_name = "sandycove-weather-db"
+database_id = "c34045f7-b15d-4ce3-a7dc-3b50fb1e08f2"

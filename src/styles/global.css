@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --color-ocean-50: #f0f7ff;
+  --color-ocean-100: #dceefb;
+  --color-ocean-200: #b6dbf7;
+  --color-ocean-400: #4da3e8;
+  --color-ocean-500: #2b7fc9;
+  --color-ocean-600: #1a5fa0;
+  --color-ocean-700: #164d82;
+  --color-ocean-800: #133d66;
+  --color-ocean-900: #0e2d4d;
+  --color-ocean-950: #091c33;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-ocean-50 text-gray-800 dark:bg-ocean-950 dark:text-gray-100 transition-colors duration-300;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white/70 dark:bg-white/[0.06] backdrop-blur-sm
+           border border-white/40 dark:border-white/[0.08]
+           rounded-2xl shadow-sm
+           transition-all duration-200;
+  }
+
+  .card:hover {
+    @apply shadow-md dark:shadow-ocean-900/30;
+  }
+
+  .card-solid {
+    @apply bg-white dark:bg-ocean-900 rounded-2xl shadow-sm
+           border border-gray-100 dark:border-ocean-800
+           transition-all duration-200;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    @apply text-xl font-semibold text-ocean-800 dark:text-ocean-200 mb-4 tracking-tight;
+  }
+
+  .stat-label {
+    @apply text-[11px] font-medium uppercase tracking-wider text-ocean-600/70 dark:text-ocean-200/50;
+  }
+
+  .stat-value {
+    @apply text-lg font-semibold tabular-nums text-gray-900 dark:text-gray-100 mt-0.5;
+  }
+
+  .stat-sub {
+    @apply text-xs text-gray-500 dark:text-gray-400 mt-0.5;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+}
