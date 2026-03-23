@@ -29,13 +29,12 @@ function scoreRain(
   rainExpected: boolean,
   minutesToRain: number | null,
 ): { score: number; label: string } {
-  if (rainRate > 0) return { score: 0, label: "Currently raining" };
+  if (rainRate > 0) return { score: -10, label: "Currently raining" };
   if (!rainExpected) return { score: 25, label: "Dry skies" };
   if (minutesToRain != null && minutesToRain > 60)
     return { score: 20, label: `Rain in ~${minutesToRain} min` };
-  if (minutesToRain != null && minutesToRain > 30)
-    return { score: 10, label: `Rain in ~${minutesToRain} min` };
-  return { score: 10, label: "Rain expected soon" };
+  // Rain within the hour = 0 points
+  return { score: 0, label: "Rain expected soon" };
 }
 
 function scoreTide(tides: { type: "high" | "low"; time: string; height: number }[]): { bonus: number; label: string } {
@@ -56,7 +55,7 @@ function scoreTide(tides: { type: "high" | "low"; time: string; height: number }
   if (next.type === "high" && progress > 0.65) return { bonus: 10, label: "High tide approaching" };
   if (past.type === "high" && progress < 0.55) return { bonus: 5, label: "Tide going out" };
   if (next.type === "high" && progress > 0.45) return { bonus: 5, label: "Tide coming in" };
-  if (past.type === "low" && progress < 0.35) return { bonus: -5, label: "Near low tide" };
+  if (past.type === "low" && progress < 0.35) return { bonus: -10, label: "Near low tide" };
   return { bonus: 0, label: "Mid-tide" };
 }
 
@@ -64,6 +63,7 @@ function scoreWaves(height: number): { score: number; label: string } {
   if (height < 0.3) return { score: 25, label: `${height.toFixed(1)}m — calm` };
   if (height < 0.6) return { score: 18, label: `${height.toFixed(1)}m — moderate` };
   if (height < 1.0) return { score: 8, label: `${height.toFixed(1)}m — choppy` };
+  if (height >= 2.0) return { score: -10, label: `${height.toFixed(1)}m — very rough` };
   return { score: 0, label: `${height.toFixed(1)}m — rough` };
 }
 

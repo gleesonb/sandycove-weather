@@ -23,7 +23,7 @@ Sandycove Weather is a production weather dashboard pulling live data from a per
 ## Features
 
 ### Current Conditions
-Real-time readings from the station: temperature, feels-like, wind speed and direction, humidity, barometric pressure, rain rate, daily rainfall total, UV index, solar radiation, and sunrise/sunset times. A stale-data indicator appears if the station goes offline.
+Real-time readings from a local personal weather station (PWS IDNLAO16) situated at Sandycove: temperature, feels-like, wind speed and direction, humidity, barometric pressure, rain rate, daily rainfall total, UV index, solar radiation, and sunrise/sunset times. A stale-data indicator appears if the station goes offline.
 
 ### Rain Alarm
 A 15-minute precipitation nowcast displayed as visual bars, powered by Open-Meteo's minutely data. Know exactly when rain is arriving — or when it will stop.
@@ -35,14 +35,14 @@ Active warnings for the Dublin region are displayed in a colour-coded banner (ye
 Interactive Recharts graphs for the current day: temperature curve, wind speed and gusts, cumulative rainfall, and barometric pressure — all built from station observations updated every 5 minutes.
 
 ### Forecast
-- **Hourly rail** — scrollable 48-hour forecast with temperature, wind, precipitation probability, and weather icons
+- **Hourly rail** — scrollable 48-hour forecast starting from the current hour (not midnight), with temperature, wind, precipitation probability, and weather icons
 - **Daily cards** — 7-day outlook with highs, lows, and conditions
 - **National text forecast** — Met Eireann's written forecast for context and colour
 
 ### Sea Conditions
-Sea surface temperature, wave height, wave period, and wave direction from Open-Meteo marine data. Dublin Port tide times (high and low) sourced from Marine Institute Ireland's ERDDAP service. Plus the all-important question:
+Sea surface temperature, wave height, wave period, and wave direction from Open-Meteo marine data. Dublin Port tide times (high and low) sourced from Marine Institute Ireland's ERDDAP API — showing today and tomorrow's tides (up to 8 tide events). Plus the all-important question:
 
-> **Good for a swim?** — A swim suitability indicator for the Forty Foot based on sea temp, wave height, and conditions.
+> **Good for a swim?** — A swim suitability indicator for the Forty Foot based on sea temp, wind, rain, wave height, and tide state. Scoring includes high tide bonuses and low tide, heavy rain, or large wave penalties.
 
 ### Webcams
 Three live webcam feeds from Sandycove and Dun Laoghaire harbour with auto-refreshing snapshots, so you can see conditions with your own eyes before making the trip.
@@ -151,7 +151,7 @@ Every response includes `source`, `fetchedAt`, `isStale`, and `fallbackUsed` met
 | Database | [Cloudflare D1](https://developers.cloudflare.com/d1/) (SQLite at the edge) |
 | XML parsing | [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) |
 | Typography | [Fraunces](https://fonts.google.com/specimen/Fraunces) (display) + [DM Sans](https://fonts.google.com/specimen/DM+Sans) (body) |
-| Design | Glass-morphism cards, ocean gradient header, wave-pattern texture |
+| Design | Glass-morphism cards, ocean gradient header with Scotsman's Bay background photo (CC Wikimedia Commons), wave-pattern texture |
 
 ---
 
@@ -159,10 +159,10 @@ Every response includes `source`, `fetchedAt`, `isStale`, and `fallbackUsed` met
 
 | Source | Used For | Type |
 |---|---|---|
-| [Weather Underground](https://www.wunderground.com/) | Current conditions, today's observations, historical data | Primary |
+| [Weather Underground](https://www.wunderground.com/) | API delivering data from local PWS IDNLAO16 (current conditions, observations, history) | Primary |
 | [Met Eireann](https://www.met.ie/) | Hourly/daily forecast, weather warnings, text forecast | Primary |
 | [Open-Meteo](https://open-meteo.com/) | Forecast fallback, rain alarm nowcast, historical fallback, marine/sea data | Fallback + supplementary |
-| [Marine Institute Ireland](https://www.marine.ie/) | Dublin Port tide predictions (ERDDAP) | Primary |
+| [Marine Institute Ireland](https://www.marine.ie/) | Dublin Port tide predictions (ERDDAP API) — today + tomorrow, up to 8 tide events | Primary |
 | [IPCamLive](https://www.ipcamlive.com/) | Sandycove and Dun Laoghaire webcam snapshots | Primary |
 
 ---
@@ -198,8 +198,6 @@ Sandycove sits on the southern shore of Dublin Bay, a small coastal village in D
 
 <div align="center">
 
-Built by **Niall Flynn** with Astro + Cloudflare
-
-*Data from Weather Underground · Forecast from Met Eireann · Sea data from Open-Meteo & Marine Institute Ireland*
+*Weather from local station IDNLAO16 · Forecast from Met Eireann · Sea data from Open-Meteo & Marine Institute Ireland*
 
 </div>
