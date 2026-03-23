@@ -67,6 +67,14 @@ function scoreWaves(height: number): { score: number; label: string } {
   return { score: 0, label: `${height.toFixed(1)}m — rough` };
 }
 
+function getUVInfo(uv: number): { emoji: string; label: string; advice: string } {
+  if (uv <= 2) return { emoji: "☀️", label: `UV ${uv} - Low`, advice: "Safe" };
+  if (uv <= 5) return { emoji: "🌤️", label: `UV ${uv} - Moderate`, advice: "Use sunscreen" };
+  if (uv <= 7) return { emoji: "⚠️", label: `UV ${uv} - High`, advice: "Protection needed" };
+  if (uv <= 10) return { emoji: "🔴", label: `UV ${uv} - Very High`, advice: "Burn risk" };
+  return { emoji: "🚨", label: `UV ${uv} - Extreme`, advice: "Avoid midday sun" };
+}
+
 interface Verdict {
   text: string;
   bg: string;
@@ -218,6 +226,14 @@ export default function SwimIndicator() {
     emoji: current.rainRate > 0 ? "🌧️" : "☀️",
     label: "Rain",
     detail: rainResult.label,
+  });
+
+  // UV index
+  const uvInfo = getUVInfo(current.uv);
+  breakdownItems.push({
+    emoji: uvInfo.emoji,
+    label: "UV Index",
+    detail: uvInfo.label,
   });
 
   if (waveResult) {

@@ -63,11 +63,17 @@ function WarningItem({ warning }: { warning: Warning }) {
 }
 
 export default function WarningBanner() {
-  const { data } = useQuery<ApiResponse<Warning[]>>({
+  const { data, isLoading } = useQuery<ApiResponse<Warning[]>>({
     queryKey: ["warnings"],
     queryFn: () => fetch("/api/warnings").then((r) => r.json()),
     refetchInterval: 10 * 60 * 1000,
   });
+
+  if (isLoading) {
+    return (
+      <div className="animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800 h-16" />
+    );
+  }
 
   const warnings = data?.data;
   if (!warnings || warnings.length === 0) return null;

@@ -93,12 +93,43 @@ export async function fetchHistory(
   return res.json();
 }
 
+/** Calculate pressure trend from historical observations */
+export function calculatePressureTrend(
+  currentPressure: number,
+  history: WUHistoryResponse,
+): "rising" | "falling" | "steady" {
+  const obs = history.observations;
+  if (!obs || obs.length < 2) return "steady";
+
+  // Find observation from ~3 hours ago (observations are roughly hourly)
+  const threeHoursAgo = Date.now() - 3 * 60 * 60 * 1000;
+  const oldObs = obs.find((o) => {
+    const obsTime = new Date(o.obsTimeUtc).getTime();
+    return obsTime <= threeHoursAgo;
+  });
+
+  if (!oldObs) return "steady";
+
+  const oldPressure = oldObs.metric.pressureMax ?? currentPressure;
+  const diff = currentPressure - oldPressure;
+
+  // Standard meteorological thresholds
+  if (diff > 1) return "rising";
+  if (diff < -1) return "falling";
+  return "steady";
+}
+
 /** Normalize WU current response to our schema */
-export function normalizeCurrentConditions(raw: WUCurrentResponse) {
+export function normalizeCurrentConditions(
+  raw: WUCurrentResponse,
+  history?: WUHistoryResponse,
+) {
   const obs = raw.observations?.[0];
   if (!obs) throw new Error("No observations in WU response");
 
   const m = obs.metric;
+  const currentPressure = m.pressure ?? 0;
+
   return {
     temperature: m.temp ?? 0,
     feelsLike: m.heatIndex ?? m.windChill ?? m.temp ?? 0,
@@ -107,8 +138,10 @@ export function normalizeCurrentConditions(raw: WUCurrentResponse) {
     windGust: m.windGust ?? 0,
     windDirection: degreesToCompass(obs.winddir ?? 0),
     windDegrees: obs.winddir ?? 0,
-    pressure: m.pressure ?? 0,
-    pressureTrend: "steady", // WU doesn't provide trend in current obs
+    pressure: currentPressure,
+    pressureTrend: history
+      ? calculatePressureTrend(currentPressure, history)
+      : "steady",
     rainRate: m.precipRate ?? 0,
     rainTotal: m.precipTotal ?? 0,
     uv: obs.uv ?? 0,

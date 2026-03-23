@@ -5,6 +5,7 @@ import { apiResponse, errorResponse } from "@/lib/response";
 import { CACHE_TTL } from "@/lib/types";
 import {
   fetchCurrentConditions,
+  fetchTodayObservations,
   normalizeCurrentConditions,
 } from "@/lib/providers/wunderground";
 
@@ -24,10 +25,14 @@ export const GET: APIRoute = async () => {
     // Cache miss or error, proceed to fetch
   }
 
-  // Fetch fresh
+  // Fetch fresh (parallel requests for current + history)
   try {
-    const raw = await fetchCurrentConditions(env.WU_API_KEY, env.STATION_ID);
-    const data = normalizeCurrentConditions(raw);
+    const [rawCurrent, rawHistory] = await Promise.all([
+      fetchCurrentConditions(env.WU_API_KEY, env.STATION_ID),
+      fetchTodayObservations(env.WU_API_KEY, env.STATION_ID).catch(() => null), // optional, fail gracefully
+    ]);
+
+    const data = normalizeCurrentConditions(rawCurrent, rawHistory ?? undefined);
 
     await setCache(env.WEATHER_CACHE, cacheKey, data, CACHE_TTL.current);
 

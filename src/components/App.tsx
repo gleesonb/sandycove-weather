@@ -1,3 +1,4 @@
+import { useState } from "react";
 import QueryProvider from "./QueryProvider";
 import WarningBanner from "./WarningBanner";
 import RainAlarm from "./RainAlarm";
@@ -19,11 +20,12 @@ export default function App() {
         <RainAlarm />
         <CurrentConditions />
 
-        <SwimIndicator />
-
         <section>
           <h2 className="section-title">Sea Conditions</h2>
-          <SeaConditions />
+          <div className="space-y-5">
+            <SeaConditions />
+            <SwimIndicator />
+          </div>
         </section>
 
         <section>
@@ -45,11 +47,32 @@ export default function App() {
           <Webcams />
         </section>
 
-        <section>
-          <h2 className="section-title">History</h2>
+        <CollapsibleSection title="History">
           <HistoryExplorer />
-        </section>
+        </CollapsibleSection>
       </div>
     </QueryProvider>
+  );
+}
+
+function CollapsibleSection({ title, children }: { title: string; children: React.ReactNode }) {
+  const [collapsed, setCollapsed] = useState(true);
+
+  return (
+    <section>
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="section-title flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+      >
+        <span
+          className="transition-transform duration-200"
+          style={{ transform: collapsed ? "rotate(-90deg)" : "rotate(0deg)" }}
+        >
+          ▼
+        </span>
+        {title}
+      </button>
+      {!collapsed && <div className="mt-4">{children}</div>}
+    </section>
   );
 }
