@@ -23,7 +23,7 @@ Sandycove Weather is a production weather dashboard pulling live data from a per
 ## Features
 
 ### Current Conditions
-Real-time readings from a local personal weather station (PWS IDNLAO16) situated at Sandycove: temperature, feels-like, wind speed and direction, humidity, barometric pressure, rain rate, daily rainfall total, UV index, solar radiation, and sunrise/sunset times. A stale-data indicator appears if the station goes offline.
+Real-time readings from a local personal weather station (PWS IDNLAO16) situated at Sandycove: temperature, feels-like, wind speed and direction, humidity, barometric pressure with trend indicator (rising/falling/steady), rain rate, daily rainfall total, UV index, solar radiation, and sunrise/sunset times. A stale-data indicator appears if the station goes offline.
 
 ### Rain Alarm
 A 15-minute precipitation nowcast displayed as visual bars, powered by Open-Meteo's minutely data. Know exactly when rain is arriving — or when it will stop.
@@ -42,12 +42,13 @@ Interactive Recharts graphs for the current day: temperature curve, wind speed a
 ### Sea Conditions
 Sea surface temperature, wave height, wave period, and wave direction from Open-Meteo marine data. Dublin Port tide times (high and low) sourced from Marine Institute Ireland's ERDDAP API — showing today and tomorrow's tides (up to 8 tide events). Plus the all-important question:
 
-> **Good for a swim?** — A swim suitability indicator for the Forty Foot based on sea temp, wind, rain, wave height, and tide state. Scoring includes high tide bonuses and low tide, heavy rain, or large wave penalties.
+> **Good for a swim?** — A swim suitability indicator for the Forty Foot based on sea temp, wind, rain, wave height, tide state, and UV index. Includes smart tide scoring that rewards high tide conditions (the Forty Foot is best enjoyed at high water) and penalties for low tide, heavy rain, or rough waves.
 
 ### Webcams
 Three live webcam feeds from Sandycove and Dun Laoghaire harbour with auto-refreshing snapshots, so you can see conditions with your own eyes before making the trip.
 
 ### Historical Explorer
+Collapsible section with historical weather data:
 - **Day view** — hourly charts and data table for any past date
 - **Date range view** — daily summaries with high/low/average across a custom range
 - Backed by D1 SQLite for persistent historical storage
@@ -149,6 +150,7 @@ Every response includes `source`, `fetchedAt`, `isStale`, and `fallbackUsed` met
 | Runtime | [Cloudflare Workers](https://workers.cloudflare.com) |
 | Cache | [Cloudflare KV](https://developers.cloudflare.com/kv/) |
 | Database | [Cloudflare D1](https://developers.cloudflare.com/d1/) (SQLite at the edge) |
+| Analytics | [Cloudflare Web Analytics](https://developers.cloudflare.com/analytics/) (privacy-first, no cookies) |
 | XML parsing | [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) |
 | Typography | [Fraunces](https://fonts.google.com/specimen/Fraunces) (display) + [DM Sans](https://fonts.google.com/specimen/DM+Sans) (body) |
 | Design | Glass-morphism cards, ocean gradient header with Scotsman's Bay background photo (CC Wikimedia Commons), wave-pattern texture |
@@ -171,22 +173,22 @@ Every response includes `source`, `fetchedAt`, `isStale`, and `fallbackUsed` met
 
 ```bash
 # Install dependencies
-npm install
+bun install
 
 # Start dev server
-npm run dev
+bun run dev
 
 # Preview with Wrangler (local Cloudflare emulation)
-npm run preview
+bun run preview
 
 # Build and deploy
-npm run deploy
+bun run deploy
 
 # Run D1 migrations
-npm run cf:migrate
+bun run cf:migrate
 ```
 
-Secrets are managed via `wrangler secret` and are never committed to the repository.
+Secrets are managed via `.env` for local development and `wrangler secret` for production.
 
 ---
 
