@@ -5,6 +5,7 @@ declare module "cloudflare:workers" {
     WEATHER_CACHE: KVNamespace;
     WEATHER_DB: D1Database;
     WU_API_KEY: string;
+    OPENWEATHER_API_KEY: string;
     STATION_ID: string;
     LATITUDE: string;
     LONGITUDE: string;

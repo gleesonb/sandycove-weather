@@ -3,7 +3,7 @@ import { env } from "cloudflare:workers";
 import { getCached, setCache } from "@/lib/cache";
 import { apiResponse, errorResponse } from "@/lib/response";
 import { CACHE_TTL } from "@/lib/types";
-import { fetchTextForecast } from "@/lib/providers/met-eireann-forecast";
+import { fetchTextForecast } from "@/lib/providers/openweathermap";
 
 interface TextForecastData {
   text: string;
@@ -17,7 +17,7 @@ export const GET: APIRoute = async () => {
   try {
     const cached = await getCached<TextForecastData>(env.WEATHER_CACHE, cacheKey);
     if (cached) {
-      return apiResponse(cached.data, "met-eireann", {
+      return apiResponse(cached.data, "openweathermap", {
         fetchedAt: cached.fetchedAt,
         isStale: false,
       });
@@ -33,13 +33,13 @@ export const GET: APIRoute = async () => {
     await setCache(env.WEATHER_CACHE, cacheKey, data, CACHE_TTL.forecast);
     await setCache(env.WEATHER_CACHE, `${cacheKey}:backup`, data, CACHE_TTL.forecast * 4);
 
-    return apiResponse(data, "met-eireann");
+    return apiResponse(data, "openweathermap");
   } catch (err) {
     // Try stale cache
     try {
       const stale = await getCached<TextForecastData>(env.WEATHER_CACHE, `${cacheKey}:backup`);
       if (stale) {
-        return apiResponse(stale.data, "met-eireann", {
+        return apiResponse(stale.data, "openweathermap", {
           fetchedAt: stale.fetchedAt,
           isStale: true,
         });

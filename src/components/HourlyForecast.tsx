@@ -87,7 +87,7 @@ export default function HourlyForecast() {
         )}
         {!data.fallbackUsed && (
           <span className="text-xs text-gray-500">
-            Forecast from Met Éireann
+            Forecast from OpenWeatherMap
           </span>
         )}
       </div>
