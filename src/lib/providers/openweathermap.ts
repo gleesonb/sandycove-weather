@@ -74,11 +74,11 @@ interface OWMResponse {
   city: OWMCity;
 }
 
-/** OpenWeatherMap icon code to standard icon name (matching WMO_CODES from open-meteo.ts) */
+/** OpenWeatherMap icon code to standard icon name (matching component iconMap) */
 const OWM_ICON_MAP: Record<string, { description: string; icon: string }> = {
   // Clear sky
-  "01d": { description: "Clear sky", icon: "clear" },
-  "01n": { description: "Clear sky", icon: "clear" },
+  "01d": { description: "Clear sky", icon: "sun" },
+  "01n": { description: "Clear sky", icon: "sun" },
 
   // Few clouds
   "02d": { description: "Partly cloudy", icon: "partly-cloudy" },
@@ -89,20 +89,20 @@ const OWM_ICON_MAP: Record<string, { description: string; icon: string }> = {
   "03n": { description: "Partly cloudy", icon: "partly-cloudy" },
 
   // Broken clouds
-  "04d": { description: "Overcast", icon: "cloudy" },
-  "04n": { description: "Overcast", icon: "cloudy" },
+  "04d": { description: "Overcast", icon: "cloud" },
+  "04n": { description: "Overcast", icon: "cloud" },
 
   // Shower rain
   "09d": { description: "Rain showers", icon: "rain" },
   "09n": { description: "Rain showers", icon: "rain" },
 
   // Rain (light/intensity)
-  "10d": { description: "Light rain", icon: "rain-light" },
-  "10n": { description: "Light rain", icon: "rain-light" },
+  "10d": { description: "Light rain", icon: "rain" },
+  "10n": { description: "Light rain", icon: "rain" },
 
   // Thunderstorm
-  "11d": { description: "Thunderstorm", icon: "thunderstorm" },
-  "11n": { description: "Thunderstorm", icon: "thunderstorm" },
+  "11d": { description: "Thunderstorm", icon: "thunder" },
+  "11n": { description: "Thunderstorm", icon: "thunder" },
 
   // Snow
   "13d": { description: "Snow", icon: "snow" },

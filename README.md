@@ -80,11 +80,17 @@ Notification subscription infrastructure for weather alerts, with subscribe/unsu
               ┌────────────────┼──────────┼──────────┘
               ▼                ▼          ▼
     ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐
-    │   Weather     │  │  Met Eireann │  │   Open-Meteo     │
-    │  Underground  │  │  (forecast,  │  │  (fallback,      │
-    │  (station)    │  │   warnings)  │  │   rain alarm,    │
+    │   Weather     │  │ OpenWeather  │  │   Open-Meteo     │
+    │  Underground  │  │     Map      │  │  (fallback,      │
+    │  (station)    │  │  (forecast)  │  │   rain alarm,    │
     │               │  │              │  │   marine/sea)    │
     └──────────────┘  └──────────────┘  └──────────────────┘
+                                │
+                         ┌──────────────┐
+                         │   Met        │
+                         │  Eireann     │
+                         │ (warnings)   │
+                         └──────────────┘
                                 │
                          ┌──────────────┐
                          │   Marine     │
@@ -162,7 +168,8 @@ Every response includes `source`, `fetchedAt`, `isStale`, and `fallbackUsed` met
 | Source | Used For | Type |
 |---|---|---|
 | [Weather Underground](https://www.wunderground.com/) | API delivering data from local PWS IDNLAO16 (current conditions, observations, history) | Primary |
-| [Met Eireann](https://www.met.ie/) | Hourly/daily forecast, weather warnings, text forecast | Primary |
+| [OpenWeatherMap](https://openweathermap.org/) | Hourly/daily forecast for Dun Laoghaire area | Primary |
+| [Met Eireann](https://www.met.ie/) | Weather warnings, text forecast | Primary |
 | [Open-Meteo](https://open-meteo.com/) | Forecast fallback, rain alarm nowcast, historical fallback, marine/sea data | Fallback + supplementary |
 | [Marine Institute Ireland](https://www.marine.ie/) | Dublin Port tide predictions (ERDDAP API) — today + tomorrow, up to 8 tide events | Primary |
 | [IPCamLive](https://www.ipcamlive.com/) | Sandycove and Dun Laoghaire webcam snapshots | Primary |
@@ -200,6 +207,6 @@ Sandycove sits on the southern shore of Dublin Bay, a small coastal village in D
 
 <div align="center">
 
-*Weather from local station IDNLAO16 · Forecast from Met Eireann · Sea data from Open-Meteo & Marine Institute Ireland*
+*Weather from local station IDNLAO16 · Forecast from OpenWeatherMap · Warnings from Met Éireann · Sea data from Open-Meteo & Marine Institute Ireland*
 
 </div>
