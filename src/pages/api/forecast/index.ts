@@ -5,9 +5,9 @@ import { apiResponse, errorResponse } from "@/lib/response";
 import { CACHE_TTL } from "@/lib/types";
 import type { ForecastHour, ForecastDay } from "@/lib/types";
 import {
-  fetchHourlyForecast as fetchMEHourly,
-  fetchDailyForecast as fetchMEDaily,
-} from "@/lib/providers/met-eireann-forecast";
+  fetchHourlyForecast as fetchOWHourly,
+  fetchDailyForecast as fetchOWDaily,
+} from "@/lib/providers/openweathermap";
 import {
   fetchHourlyForecast as fetchOMHourly,
   fetchDailyForecast as fetchOMDaily,
@@ -25,7 +25,7 @@ export const GET: APIRoute = async () => {
   try {
     const cached = await getCached<ForecastData>(env.WEATHER_CACHE, cacheKey);
     if (cached) {
-      return apiResponse(cached.data, "met-eireann", {
+      return apiResponse(cached.data, "openweathermap", {
         fetchedAt: cached.fetchedAt,
         isStale: false,
       });
@@ -34,11 +34,11 @@ export const GET: APIRoute = async () => {
     // Cache miss or error, proceed to fetch
   }
 
-  // Try Met Eireann first
+  // Try OpenWeatherMap first
   try {
     const [hourly, daily] = await Promise.all([
-      fetchMEHourly(),
-      fetchMEDaily(),
+      fetchOWHourly(),
+      fetchOWDaily(),
     ]);
     const data: ForecastData = { hourly, daily };
 
@@ -46,9 +46,9 @@ export const GET: APIRoute = async () => {
     // Also store a backup for stale fallback
     await setCache(env.WEATHER_CACHE, `${cacheKey}:backup`, data, CACHE_TTL.forecast * 4);
 
-    return apiResponse(data, "met-eireann");
+    return apiResponse(data, "openweathermap");
   } catch {
-    // Met Eireann failed, try Open-Meteo fallback
+    // OpenWeatherMap failed, try Open-Meteo fallback
   }
 
   // Fallback to Open-Meteo

@@ -6,6 +6,8 @@ pages_build_output_dir = "./dist"
 STATION_ID = "IDNLAO16"
 LATITUDE = "53.2867"
 LONGITUDE = "-6.1179"
+# OPENWEATHER_API_KEY must be set as a Cloudflare secret (not committed)
+# Run: wrangler secret put OPENWEATHER_API_KEY
 
 [[kv_namespaces]]
 binding = "WEATHER_CACHE"
