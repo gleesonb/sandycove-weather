@@ -3,6 +3,10 @@ name: Claude
 on:
   issue_comment:
     types: [created]
+                                                                                                                                                                   
+on:
+  issue_comment:                                                                                                                                                 
+    types: [created]                                            
   issues:
     types: [opened, edited]
   pull_request:
@@ -19,3 +23,4 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           base_url: ${{ secrets.ANTHROPIC_BASE_URL }}
+                                                         
