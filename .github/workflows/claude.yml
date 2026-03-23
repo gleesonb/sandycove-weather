@@ -1,10 +1,6 @@
 name: Claude
 
 on:
-  issue_comment:
-    types: [created]
-                                                                                                                                                                   
-on:
   issue_comment:                                                                                                                                                 
     types: [created]                                            
   issues:
