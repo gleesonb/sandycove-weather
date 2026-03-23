@@ -286,7 +286,7 @@ export default function SwimIndicator() {
               <div className="text-[11px] font-medium uppercase tracking-wider text-gray-500/80 dark:text-gray-400/60">
                 {item.label}
               </div>
-              <div className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
+              <div className="text-sm font-medium text-gray-800 dark:text-gray-200">
                 {item.detail}
               </div>
             </div>
