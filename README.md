@@ -209,4 +209,8 @@ Sandycove sits on the southern shore of Dublin Bay, a small coastal village in D
 
 *Weather from local station IDNLAO16 · Forecast from OpenWeatherMap · Warnings from Met Éireann · Sea data from Open-Meteo & Marine Institute Ireland*
 
+---
+
+*Note: This repository uses GitHub Actions for automated workflow management.*
+
 </div>
