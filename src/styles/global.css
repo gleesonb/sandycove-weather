@@ -54,7 +54,7 @@
   }
 
   .stat-label {
-    @apply text-[11px] font-medium uppercase tracking-wider text-ocean-600/70 dark:text-ocean-300/60;
+    @apply text-[11px] font-medium uppercase tracking-wider text-ocean-600/70 dark:text-ocean-400/60;
   }
 
   .stat-value {
