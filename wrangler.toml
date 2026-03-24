@@ -17,3 +17,6 @@ id = "6bb90a30392943bb9f829b4caebe49b1"
 binding = "WEATHER_DB"
 database_name = "sandycove-weather-db"
 database_id = "c34045f7-b15d-4ce3-a7dc-3b50fb1e08f2"
+
+[ai]
+binding = "AI"

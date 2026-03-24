@@ -1,6 +1,7 @@
 /** OpenWeatherMap provider using 5-day forecast endpoint */
 
 import type { ForecastHour, ForecastDay } from "@/lib/types";
+import { generateWeatherForecast } from "@/lib/ai";
 
 const API_KEY = "6ad07723086cbffbb23cba015b9658e6";
 const BASE_URL = "https://api.openweathermap.org/data/2.5/forecast";
@@ -244,10 +245,17 @@ export async function fetchDailyForecast(): Promise<ForecastDay[]> {
 }
 
 export async function fetchTextForecast(): Promise<{ text: string; issued: string }> {
-  // OpenWeatherMap doesn't provide text forecasts
-  // Return a placeholder indicating this source doesn't support text forecasts
+  // Fetch hourly and daily forecasts to use as context for AI
+  const [hourly, daily] = await Promise.all([
+    fetchHourlyForecast(),
+    fetchDailyForecast(),
+  ]);
+
+  // Generate AI-powered text forecast
+  const text = await generateWeatherForecast({ hourly, daily });
+
   return {
-    text: "OpenWeatherMap does not provide text-based forecasts. Please use the hourly or daily forecasts for detailed weather information.",
+    text,
     issued: new Date().toISOString(),
   };
 }
