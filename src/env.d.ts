@@ -10,6 +10,7 @@ declare module "cloudflare:workers" {
     LATITUDE: string;
     LONGITUDE: string;
     ASSETS: Fetcher;
+    AI: Ai<typeof import("@cloudflare/workers-types")>;
   }
   const env: Env;
   export { env };

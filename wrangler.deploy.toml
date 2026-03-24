@@ -2,6 +2,7 @@ name = "sandycove-weather"
 compatibility_date = "2024-12-01"
 main = "./dist/server/entry.mjs"
 workers_dev = true
+account_id = "71e05c0663bf82f57962f516d5914ce0"
 routes = [{ pattern = "weather.billgleeson.com/*", zone_name = "billgleeson.com" }]
 
 [[rules]]
@@ -25,3 +26,6 @@ id = "6bb90a30392943bb9f829b4caebe49b1"
 binding = "WEATHER_DB"
 database_name = "sandycove-weather-db"
 database_id = "c34045f7-b15d-4ce3-a7dc-3b50fb1e08f2"
+
+[ai]
+binding = "AI"
