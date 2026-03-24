@@ -54,15 +54,43 @@
   }
 
   .stat-label {
-    @apply text-[11px] font-medium uppercase tracking-wider text-ocean-600/70 dark:text-ocean-200/50;
+    @apply text-[11px] font-medium uppercase tracking-wider text-ocean-600/70 dark:text-ocean-300/60;
   }
 
   .stat-value {
-    @apply text-lg font-semibold tabular-nums text-gray-900 dark:text-gray-100 mt-0.5;
+    @apply text-lg font-semibold tabular-nums text-gray-900 dark:text-gray-50 mt-0.5;
   }
 
   .stat-sub {
     @apply text-xs text-gray-500 dark:text-gray-400 mt-0.5;
+  }
+
+  /* Warning banner styles with dark mode support */
+  .warning-yellow {
+    @apply bg-yellow-100 dark:bg-yellow-950/40
+           border-yellow-500/80 dark:border-yellow-600/60
+           text-yellow-900 dark:text-yellow-100;
+  }
+
+  .warning-orange {
+    @apply bg-orange-100 dark:bg-orange-950/40
+           border-orange-600/80 dark:border-orange-700/60
+           text-orange-950 dark:text-orange-100;
+  }
+
+  .warning-red {
+    @apply bg-red-100 dark:bg-red-950/40
+           border-red-600/80 dark:border-red-700/60
+           text-red-950 dark:text-red-100;
+  }
+
+  /* Skeleton loading states */
+  .skeleton-bg {
+    @apply bg-gray-200 dark:bg-gray-700/50;
+  }
+
+  .card-skeleton {
+    @apply bg-ocean-100/50 dark:bg-white/[0.04];
   }
 }
 

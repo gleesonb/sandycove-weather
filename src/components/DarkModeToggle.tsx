@@ -24,7 +24,7 @@ export default function DarkModeToggle() {
     <button
       onClick={toggle}
       aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-      className="p-2 rounded-lg hover:bg-white/10 transition-colors text-xl leading-none cursor-pointer"
+      className="p-2 rounded-lg hover:bg-white/10 dark:hover:bg-white/5 transition-colors text-xl leading-none cursor-pointer"
     >
       {dark ? "\u2600\uFE0F" : "\uD83C\uDF19"}
     </button>

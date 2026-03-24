@@ -34,10 +34,10 @@ export default function RainAlarm() {
     <div
       className={`rounded-xl p-4 transition-colors ${
         isCurrentlyRaining
-          ? "bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800"
+          ? "bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-700/60"
           : isRainComing
-            ? "bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800"
-            : "bg-green-50 dark:bg-gray-800 border border-green-200 dark:border-gray-700"
+            ? "bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-700/60"
+            : "bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800/40"
       }`}
     >
       <div className="flex items-center justify-between mb-2">

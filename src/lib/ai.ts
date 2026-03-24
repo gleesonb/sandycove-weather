@@ -72,9 +72,23 @@ export async function generateWeatherForecast(
 					role: "system",
 					content:
 						"You are a helpful weather assistant for Sandycove, Dublin, Ireland. " +
-						"Generate clear, concise weather summaries in a friendly, informative tone. " +
-						"Focus on key information like temperature ranges, precipitation chances, " +
-						"wind conditions, and any notable changes. Keep responses under 150 words.",
+						"Generate clear, conversational weather summaries that are easy to read. " +
+						"\n\n" +
+						"FORMAT REQUIREMENTS:\n" +
+						"- Start with 'Today' followed by a concise summary\n" +
+						"- Add a blank line, then 'Tomorrow' section\n" +
+						"- Use clear paragraph breaks between sections\n" +
+						"- Keep each section focused and scannable\n" +
+						"- Use conversational language but stay informative\n" +
+						"- Keep total response under 150 words\n" +
+						"- Highlight important weather changes (rain, wind, temp drops)\n" +
+						"\n" +
+						"Example structure:\n" +
+						"Today will be [conditions] with [details]. [Additional info].\n" +
+						"\n" +
+						"Tomorrow expects [conditions]. [Key details].\n\n" +
+						"Focus on what matters: temperature ranges, precipitation chances, " +
+						"wind conditions, and any notable changes.",
 				},
 				{
 					role: "user",
@@ -163,7 +177,13 @@ function buildForecastPrompt(forecastData: {
 		prompt += `- Wind: ${tomorrowDaily.windSpeed.toFixed(1)} km/h\n`;
 	}
 
-	prompt += `\nPlease provide a clear, concise forecast summary (under 150 words) that highlights the key information and any important weather trends.`;
+	prompt += `\nProvide a well-structured forecast (under 150 words):\n\n`;
+	prompt += `1. Start with "Today" and describe today's weather\n`;
+	prompt += `2. Add a blank line\n`;
+	prompt += `3. Start with "Tomorrow" and describe tomorrow's weather\n`;
+	prompt += `4. Keep each section concise and conversational\n`;
+	prompt += `5. Highlight important changes (rain, wind, temperature)\n\n`;
+	prompt += `Use natural language like "Today will be partly cloudy with a high of 15°C..."`;
 
 	return prompt;
 }
@@ -205,29 +225,29 @@ function generateFallbackForecast(forecastData: {
 	const todayDaily = forecastData.daily.find((d) => d.date === today);
 	const tomorrowDaily = forecastData.daily.find((d) => d.date === tomorrow);
 
-	let forecast = `Weather for Sandycove, Dublin:\n\n`;
-	forecast += `Today: ${todayDaily?.description || "Variable conditions"}. `;
-	forecast += `Temperature around ${avgTemp.toFixed(1)}°C (${todayDaily?.tempLow.toFixed(1)}°C to ${todayDaily?.tempHigh.toFixed(1)}°C). `;
+	let forecast = `Today will be ${todayDaily?.description?.toLowerCase() || "variable conditions"}. `;
+	forecast += `Temperatures will range from ${todayDaily?.tempLow.toFixed(1)}°C to ${todayDaily?.tempHigh.toFixed(1)}°C, `;
+	forecast += `averaging around ${avgTemp.toFixed(1)}°C. `;
 
 	if (maxPrecipProb > 50) {
-		forecast += `Rain likely (${maxPrecipProb.toFixed(0)}% chance). `;
+		forecast += `Rain is likely (${maxPrecipProb.toFixed(0)}% chance). `;
 	} else if (maxPrecipProb > 20) {
-		forecast += `Possible showers (${maxPrecipProb.toFixed(0)}% chance). `;
+		forecast += `There's a chance of showers (${maxPrecipProb.toFixed(0)}%). `;
 	} else {
-		forecast += `Precipitation unlikely. `;
+		forecast += `Precipitation is unlikely. `;
 	}
 
-	forecast += `Winds ${avgWind.toFixed(1)} km/h.\n`;
+	forecast += `Winds will be around ${avgWind.toFixed(1)} km/h.\n`;
 
 	if (tomorrowDaily) {
-		forecast += `\nTomorrow: ${tomorrowDaily.description}. `;
-		forecast += `${tomorrowDaily.tempLow.toFixed(1)}°C to ${tomorrowDaily.tempHigh.toFixed(1)}°C. `;
+		forecast += `\nTomorrow expects ${tomorrowDaily.description.toLowerCase()}. `;
+		forecast += `Temperatures between ${tomorrowDaily.tempLow.toFixed(1)}°C and ${tomorrowDaily.tempHigh.toFixed(1)}°C. `;
 
 		if (tomorrowDaily.precipProbability > 50) {
 			forecast += `Rain expected (${tomorrowDaily.precipProbability.toFixed(0)}% chance). `;
 		}
 
-		forecast += `Winds ${tomorrowDaily.windSpeed.toFixed(1)} km/h.`;
+		forecast += `Winds around ${tomorrowDaily.windSpeed.toFixed(1)} km/h.`;
 	}
 
 	return forecast;

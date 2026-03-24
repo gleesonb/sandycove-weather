@@ -27,12 +27,25 @@ const WEBCAMS = [
 export default function Webcams() {
   const [selected, setSelected] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
+  const [errored, setErrored] = useState<Set<string>>(new Set());
 
   // Refresh snapshots every 15s
   useEffect(() => {
     const interval = setInterval(() => setTick((t) => t + 1), 15_000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleImageError = (id: string) => {
+    setErrored((prev) => new Set(prev).add(id));
+  };
+
+  const handleImageLoad = (id: string) => {
+    setErrored((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  };
 
   const cam = selected ? WEBCAMS.find((c) => c.id === selected) : null;
 
@@ -53,11 +66,15 @@ export default function Webcams() {
                 alt={c.name}
                 className="w-full h-full object-cover"
                 loading="lazy"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                onError={() => handleImageError(c.id)}
+                onLoad={() => handleImageLoad(c.id)}
+                style={{ display: errored.has(c.id) ? "none" : "block" }}
               />
-              <div className="absolute inset-0 flex items-center justify-center text-ocean-400/40 dark:text-ocean-600/40 text-3xl pointer-events-none">
-                Offline
-              </div>
+              {errored.has(c.id) && (
+                <div className="absolute inset-0 flex items-center justify-center text-ocean-400/40 dark:text-ocean-600/40 text-3xl pointer-events-none">
+                  Offline
+                </div>
+              )}
               <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-full px-2 py-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                 <span className="text-[10px] font-medium text-white uppercase tracking-wider">Live</span>
@@ -83,11 +100,15 @@ export default function Webcams() {
               src={`${cam.snapshot}?t=${tick}`}
               alt={cam.name}
               className="w-full h-full object-cover"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              onError={() => handleImageError(cam.id)}
+              onLoad={() => handleImageLoad(cam.id)}
+              style={{ display: errored.has(cam.id) ? "none" : "block" }}
             />
-            <div className="absolute inset-0 flex items-center justify-center text-ocean-400/30 text-4xl pointer-events-none">
-              Offline
-            </div>
+            {errored.has(cam.id) && (
+              <div className="absolute inset-0 flex items-center justify-center text-ocean-400/30 text-4xl pointer-events-none">
+                Offline
+              </div>
+            )}
             <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-full px-2.5 py-1">
               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
               <span className="text-xs font-medium text-white uppercase tracking-wider">Live — refreshes every 15s</span>

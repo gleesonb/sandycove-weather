@@ -70,14 +70,14 @@ export default function CurrentConditions() {
 
       {/* Hero temperature */}
       <div className="card p-8 text-center">
-        <div className="font-display text-6xl sm:text-7xl font-light tabular-nums tracking-tight text-ocean-900 dark:text-white">
+        <div className="font-display text-6xl sm:text-7xl font-light tabular-nums tracking-tight text-ocean-900 dark:text-gray-50">
           {c.temperature.toFixed(1)}
           <span className="text-3xl sm:text-4xl text-ocean-400 dark:text-ocean-400 ml-0.5">°C</span>
         </div>
         <div className="text-gray-500 dark:text-gray-400 mt-2 text-sm">
           Feels like {c.feelsLike.toFixed(1)}°C
         </div>
-        <div className="text-[11px] text-ocean-400/60 dark:text-ocean-200/30 mt-2 uppercase tracking-wider">
+        <div className="text-[11px] text-ocean-400/60 dark:text-ocean-300/40 mt-2 uppercase tracking-wider">
           Updated {formatTime(c.lastUpdated)}
         </div>
       </div>

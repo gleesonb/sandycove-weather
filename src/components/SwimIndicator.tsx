@@ -172,8 +172,13 @@ export default function SwimIndicator() {
   // Need at least current conditions to show anything useful
   if (!current) {
     return (
-      <div className="animate-pulse">
+      <div className="animate-pulse space-y-4">
         <div className="h-40 card bg-ocean-100/50 dark:bg-white/[0.04]" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-20 card bg-ocean-100/50 dark:bg-white/[0.04]" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -269,11 +274,9 @@ export default function SwimIndicator() {
   }
 
   return (
-    <div
-      className={`rounded-2xl border p-5 transition-colors duration-300 ${verdict.bg} ${verdict.border}`}
-    >
+    <div className={`card p-6 sm:p-8 ${verdict.bg} ${verdict.border}`}>
       {/* Verdict heading */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-5">
         <span className="text-3xl" role="img" aria-hidden="true">
           {verdict.emoji}
         </span>
@@ -291,19 +294,16 @@ export default function SwimIndicator() {
       {/* Breakdown grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {breakdownItems.map((item) => (
-          <div
-            key={item.label}
-            className="flex items-start gap-2 rounded-xl bg-white/40 dark:bg-white/[0.06] px-3 py-2.5"
-          >
-            <span className="text-base mt-0.5 shrink-0" role="img" aria-hidden="true">
-              {item.emoji}
-            </span>
-            <div className="min-w-0">
-              <div className="text-[11px] font-medium uppercase tracking-wider text-gray-500/80 dark:text-gray-400/60">
-                {item.label}
-              </div>
-              <div className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                {item.detail}
+          <div key={item.label} className="card p-3.5">
+            <div className="flex items-start gap-2">
+              <span className="text-base mt-0.5 shrink-0" role="img" aria-hidden="true">
+                {item.emoji}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="stat-label">{item.label}</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-gray-50 mt-0.5">
+                  {item.detail}
+                </div>
               </div>
             </div>
           </div>

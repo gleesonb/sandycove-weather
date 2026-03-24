@@ -2,10 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ApiResponse, Warning } from "@/lib/types";
 
-const LEVEL_STYLES: Record<Warning["level"], { bg: string; border: string; text: string }> = {
-  yellow: { bg: "bg-[#fbbf24]", border: "border-yellow-500", text: "text-yellow-900" },
-  orange: { bg: "bg-[#f97316]", border: "border-orange-600", text: "text-orange-950" },
-  red: { bg: "bg-[#ef4444]", border: "border-red-600", text: "text-white" },
+const LEVEL_STYLES: Record<Warning["level"], { className: string }> = {
+  yellow: { className: "warning-yellow" },
+  orange: { className: "warning-orange" },
+  red: { className: "warning-red" },
 };
 
 function formatDublinTime(iso: string): string {
@@ -26,7 +26,7 @@ function WarningItem({ warning }: { warning: Warning }) {
 
   return (
     <div
-      className={`${styles.bg} ${styles.border} ${styles.text} border rounded-lg overflow-hidden`}
+      className={`${styles.className} border rounded-lg overflow-hidden transition-colors duration-200`}
     >
       <button
         className="w-full px-4 py-3 text-left flex items-center justify-between gap-3 cursor-pointer"
