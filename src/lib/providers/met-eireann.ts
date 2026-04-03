@@ -77,8 +77,57 @@ function normalizeWarning(raw: MEWarningRaw): Warning {
 
 /** Sanitize JSON string - Met Éireann sometimes includes invalid control characters */
 function sanitizeJSON(text: string): string {
-  // Remove control characters except \t, \n, \r
-  return text.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, "");
+  // Escape control characters only inside JSON string literals
+  let result = "";
+  let inString = false;
+  let escapeNext = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    const code = text.charCodeAt(i);
+
+    if (escapeNext) {
+      result += c;
+      escapeNext = false;
+      continue;
+    }
+
+    if (c === "\\") {
+      result += c;
+      escapeNext = true;
+      continue;
+    }
+
+    if (c === '"') {
+      inString = !inString;
+      result += c;
+      continue;
+    }
+
+    // Not inside a string literal - keep as-is
+    if (!inString) {
+      result += c;
+      continue;
+    }
+
+    // Inside string - escape control characters
+    if (code === 9) {
+      // tab -> \t
+      result += "\\t";
+    } else if (code === 10) {
+      // newline -> \n
+      result += "\\n";
+    } else if (code === 13) {
+      // carriage return -> \r
+      result += "\\r";
+    } else if (code < 32 || code === 127) {
+      // Remove other control chars (null, bell, form feed, etc.)
+    } else {
+      result += c;
+    }
+  }
+
+  return result;
 }
 
 export async function fetchWarnings(): Promise<Warning[]> {
