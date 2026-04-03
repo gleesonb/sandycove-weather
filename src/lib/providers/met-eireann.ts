@@ -75,6 +75,12 @@ function normalizeWarning(raw: MEWarningRaw): Warning {
   };
 }
 
+/** Sanitize JSON string - Met Éireann sometimes includes invalid control characters */
+function sanitizeJSON(text: string): string {
+  // Remove control characters except \t, \n, \r
+  return text.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, "");
+}
+
 export async function fetchWarnings(): Promise<Warning[]> {
   const res = await fetch(WARNINGS_URL, {
     headers: { Accept: "application/json" },
@@ -83,7 +89,8 @@ export async function fetchWarnings(): Promise<Warning[]> {
     throw new Error(`Met Éireann warnings failed: ${res.status} ${res.statusText}`);
   }
 
-  const json = await res.json();
+  const text = await res.text();
+  const json = JSON.parse(sanitizeJSON(text));
 
   // The response may be an array directly or wrapped in an object
   const rawWarnings: MEWarningRaw[] = Array.isArray(json)
