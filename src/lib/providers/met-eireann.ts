@@ -40,9 +40,20 @@ function normalizeLevel(raw: MEWarningRaw): Warning["level"] {
 function isDublinRelevant(raw: MEWarningRaw): boolean {
   const regions = raw.regions ?? raw.region ?? [];
   if (regions.length === 0) return true; // nationwide if no regions specified
-  return regions.some((r) =>
+
+  // Check for text-based region names first
+  const hasTextMatch = regions.some((r) =>
     DUBLIN_REGIONS.some((d) => r.toLowerCase().includes(d)),
   );
+  if (hasTextMatch) return true;
+
+  // Met Éireann now uses EIxx codes. If warning covers most counties,
+  // treat as nationwide (20+ regions = essentially all of Ireland)
+  if (regions.length >= 20) return true;
+
+  // Dublin county codes (Dún Laoghaire-Rathdown, Fingal, South Dublin)
+  const dublinCodes = ["EI15", "EI16", "EI17"];
+  return regions.some((r) => dublinCodes.includes(r));
 }
 
 function isActive(raw: MEWarningRaw): boolean {
