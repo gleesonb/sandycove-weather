@@ -22,10 +22,12 @@ export default function App() {
 
         <section>
           <h2 className="section-title">Sea Conditions</h2>
-          <div className="space-y-5">
-            <SeaConditions />
-            <SwimIndicator />
-          </div>
+          <SeaConditions />
+        </section>
+
+        <section>
+          <h2 className="section-title">Time for a Swim?</h2>
+          <SwimIndicator />
         </section>
 
         <section>
