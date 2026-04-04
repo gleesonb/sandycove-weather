@@ -68,16 +68,16 @@ export default function TideGraph() {
     new Date(a.time).getTime() - new Date(b.time).getTime()
   );
 
-  // Get today's date range
-  const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const todayEnd = new Date(todayStart);
-  todayEnd.setDate(todayEnd.getDate() + 2); // Show today + tomorrow
+  // Use tide data range, extend slightly for context
+  const firstTideTime = new Date(sortedTides[0].time).getTime();
+  const lastTideTime = new Date(sortedTides[sortedTides.length - 1].time).getTime();
 
-  // Generate points every 30 minutes
-  for (let time = todayStart.getTime(); time <= todayEnd.getTime(); time += 30 * 60 * 1000) {
-    const pointTime = new Date(time);
+  // Start 2 hours before first tide, end 2 hours after last tide
+  const startTime = firstTideTime - 2 * 60 * 60 * 1000;
+  const endTime = lastTideTime + 2 * 60 * 60 * 1000;
 
+  // Generate points every 15 minutes for smoother curve
+  for (let time = startTime; time <= endTime; time += 15 * 60 * 1000) {
     // Find surrounding tides
     const prevTide = [...sortedTides].reverse().find((t) => new Date(t.time).getTime() <= time);
     const nextTide = sortedTides.find((t) => new Date(t.time).getTime() > time);
@@ -87,26 +87,28 @@ export default function TideGraph() {
     let type: "high" | "low" | undefined;
 
     if (prevTide && nextTide) {
-      // Interpolate
       const prevTime = new Date(prevTide.time).getTime();
       const nextTime = new Date(nextTide.time).getTime();
       const progress = (time - prevTime) / (nextTime - prevTime);
 
-      // Use sine curve for smooth tide transition
-      const sineValue = Math.sin(progress * Math.PI);
-      height = prevTide.height + (nextTide.height - prevTide.height) * sineValue;
+      // Use cosine interpolation for smooth tide curve (0 at prevTide, π at nextTide)
+      // This creates the characteristic tide hump or dip
+      const cosValue = (1 - Math.cos(progress * Math.PI)) / 2;
+      height = prevTide.height + (nextTide.height - prevTide.height) * cosValue;
 
-      // Mark tide points
-      if (progress < 0.05) {
+      // Mark tide points (at the actual tide time, progress ≈ 0)
+      if (Math.abs(time - prevTime) < 15 * 60 * 1000) {
         label = formatTime(prevTide.time);
         type = prevTide.type;
       }
     } else if (prevTide) {
       height = prevTide.height;
+    } else if (nextTide) {
+      height = nextTide.height;
     }
 
     points.push({
-      time: pointTime.toISOString(),
+      time: new Date(time).toISOString(),
       height: Math.round(height * 10) / 10,
       label,
       type,
@@ -170,37 +172,30 @@ export default function TideGraph() {
           <AreaChart data={points} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
             <defs>
               <linearGradient id="tideGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="currentColor" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="currentColor" stopOpacity={0} />
+                <stop offset="5%" stopColor="#0284c7" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#0284c7" stopOpacity={0} />
               </linearGradient>
             </defs>
             <XAxis
               dataKey="time"
               tickFormatter={tickFormatter}
-              tick={{ fill: "currentColor", fontSize: 10 }}
-              stroke="currentColor"
+              tick={{ fill: "#9ca3af", fontSize: 10 }}
+              stroke="#9ca3af"
               className="text-gray-400 dark:text-gray-600"
               interval={6}
             />
             <YAxis
               domain={[minHeight - 0.5, maxHeight + 0.5]}
-              tick={{ fill: "currentColor", fontSize: 10 }}
-              stroke="currentColor"
+              tick={{ fill: "#9ca3af", fontSize: 10 }}
+              stroke="#9ca3af"
               className="text-gray-400 dark:text-gray-600"
               width={35}
             />
             <Tooltip content={<CustomTooltip />} />
-            <ReferenceLine
-              y={0}
-              stroke="currentColor"
-              strokeOpacity={0.1}
-              className="text-gray-400 dark:text-gray-600"
-            />
             <Area
               type="monotone"
               dataKey="height"
-              stroke="currentColor"
-              className="text-ocean-600 dark:text-ocean-400"
+              stroke="#0284c7"
               strokeWidth={2}
               fill="url(#tideGradient)"
             />
