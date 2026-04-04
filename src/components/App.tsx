@@ -5,6 +5,8 @@ import RainAlarm from "./RainAlarm";
 import CurrentConditions from "./CurrentConditions";
 import SeaConditions from "./SeaConditions";
 import SwimIndicator from "./SwimIndicator";
+import BestSwimTime from "./BestSwimTime";
+import TideGraph from "./TideGraph";
 import TodayCharts from "./TodayCharts";
 import HourlyForecast from "./HourlyForecast";
 import DailyForecast from "./DailyForecast";
@@ -22,12 +24,18 @@ export default function App() {
 
         <section>
           <h2 className="section-title">Sea Conditions</h2>
-          <SeaConditions />
+          <div className="space-y-5">
+            <SeaConditions />
+            <TideGraph />
+          </div>
         </section>
 
         <section>
           <h2 className="section-title">Time for a Swim?</h2>
-          <SwimIndicator />
+          <div className="space-y-5">
+            <BestSwimTime />
+            <SwimIndicator />
+          </div>
         </section>
 
         <section>

@@ -123,6 +123,7 @@ export function calculatePressureTrend(
 export function normalizeCurrentConditions(
   raw: WUCurrentResponse,
   history?: WUHistoryResponse,
+  supplement?: { visibility?: number; uv?: number },
 ) {
   const obs = raw.observations?.[0];
   if (!obs) throw new Error("No observations in WU response");
@@ -144,8 +145,9 @@ export function normalizeCurrentConditions(
       : "steady",
     rainRate: m.precipRate ?? 0,
     rainTotal: m.precipTotal ?? 0,
-    uv: obs.uv ?? 0,
+    uv: supplement?.uv ?? obs.uv ?? 0,
     solarRadiation: obs.solarRadiation ?? 0,
+    visibility: supplement?.visibility ?? 10000, // default 10km if not available
     lastUpdated: obs.obsTimeUtc,
     stationOnline: true,
   };

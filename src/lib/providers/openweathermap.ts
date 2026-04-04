@@ -165,6 +165,7 @@ export async function fetchHourlyForecast(): Promise<ForecastHour[]> {
       windDirection: degreesToCompass(item.wind.deg),
       precipitation: (item.rain?.["1h"] ?? item.snow?.["1h"] ?? 0) + (item.rain?.["3h"] ?? item.snow?.["3h"] ?? 0) / 3,
       precipProbability: item.pop * 100,
+      uv: 0, // Not available in OpenWeatherMap 5-day forecast
       description: iconData.description,
       icon: iconData.icon,
     };

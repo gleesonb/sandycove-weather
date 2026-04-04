@@ -8,6 +8,7 @@ import {
   fetchTodayObservations,
   normalizeCurrentConditions,
 } from "@/lib/providers/wunderground";
+import { fetchCurrentSupplement } from "@/lib/providers/open-meteo";
 
 export const GET: APIRoute = async () => {
   const cacheKey = "current";
@@ -25,14 +26,15 @@ export const GET: APIRoute = async () => {
     // Cache miss or error, proceed to fetch
   }
 
-  // Fetch fresh (parallel requests for current + history)
+  // Fetch fresh (parallel requests for current + history + supplement)
   try {
-    const [rawCurrent, rawHistory] = await Promise.all([
+    const [rawCurrent, rawHistory, supplement] = await Promise.all([
       fetchCurrentConditions(env.WU_API_KEY, env.STATION_ID),
       fetchTodayObservations(env.WU_API_KEY, env.STATION_ID).catch(() => null), // optional, fail gracefully
+      fetchCurrentSupplement().catch(() => null), // visibility + UV from Open-Meteo
     ]);
 
-    const data = normalizeCurrentConditions(rawCurrent, rawHistory ?? undefined);
+    const data = normalizeCurrentConditions(rawCurrent, rawHistory ?? undefined, supplement ?? undefined);
 
     await setCache(env.WEATHER_CACHE, cacheKey, data, CACHE_TTL.current);
 

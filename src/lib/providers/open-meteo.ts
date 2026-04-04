@@ -7,13 +7,19 @@ const PARAMS = new URLSearchParams({
   latitude: "53.2867",
   longitude: "-6.1179",
   hourly:
-    "temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation,precipitation_probability,weather_code",
+    "temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation,precipitation_probability,weather_code,uv_index,visibility",
   daily:
     "temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,sunrise,sunset,weather_code",
   timezone: "Europe/Dublin",
+  current: "temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_gusts_10m,visibility,uv_index",
 });
 
 interface OpenMeteoResponse {
+  current?: {
+    temperature_2m: number | null;
+    visibility: number | null;
+    uv_index: number | null;
+  };
   hourly?: {
     time: string[];
     temperature_2m: (number | null)[];
@@ -25,6 +31,8 @@ interface OpenMeteoResponse {
     precipitation: (number | null)[];
     precipitation_probability: (number | null)[];
     weather_code: (number | null)[];
+    uv_index: (number | null)[];
+    visibility: (number | null)[];
   };
   daily?: {
     time: string[];
@@ -112,6 +120,7 @@ export async function fetchHourlyForecast(): Promise<ForecastHour[]> {
       windDirection: degreesToCompass(h.wind_direction_10m[i] ?? 0),
       precipitation: h.precipitation[i] ?? 0,
       precipProbability: h.precipitation_probability[i] ?? 0,
+      uv: h.uv_index?.[i] ?? 0,
       description: wmo.description,
       icon: wmo.icon,
     };
@@ -194,4 +203,24 @@ export async function fetchHistoricalObservations(
     uv: h.uv_index[i] ?? 0,
     solarRadiation: h.shortwave_radiation[i] ?? 0,
   }));
+}
+
+/** Fetch current visibility and UV from Open-Meteo (supplement to PWS data) */
+export async function fetchCurrentSupplement(): Promise<{ visibility: number; uv: number } | null> {
+  try {
+    const params = new URLSearchParams({
+      latitude: "53.2867",
+      longitude: "-6.1179",
+      current: "visibility,uv_index",
+    });
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+    if (!res.ok) return null;
+    const data = await res.json() as { current?: { visibility: number | null; uv_index: number | null } };
+    return {
+      visibility: data.current?.visibility ?? 10000, // default to 10km
+      uv: data.current?.uv_index ?? 0,
+    };
+  } catch {
+    return null;
+  }
 }

@@ -7,6 +7,7 @@ import type {
   ForecastHour,
   ForecastDay,
 } from "@/lib/types";
+import ShareCard from "./ShareCard";
 
 // --- Scoring helpers ---
 
@@ -276,19 +277,28 @@ export default function SwimIndicator() {
   return (
     <div className={`card p-6 sm:p-8 ${verdict.bg} ${verdict.border}`}>
       {/* Verdict heading */}
-      <div className="flex items-center gap-3 mb-5">
-        <span className="text-3xl" role="img" aria-hidden="true">
-          {verdict.emoji}
-        </span>
-        <div>
-          <h2 className={`font-display text-2xl sm:text-3xl font-semibold tracking-tight ${verdict.textColor}`}>
-            {verdict.text}
-          </h2>
-          <p className={`text-sm mt-0.5 ${verdict.subTextColor}`}>
-            Forty Foot, Sandycove
-            {!sea && " · Sea data loading…"}
-          </p>
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <span className="text-3xl" role="img" aria-hidden="true">
+            {verdict.emoji}
+          </span>
+          <div>
+            <h2 className={`font-display text-2xl sm:text-3xl font-semibold tracking-tight ${verdict.textColor}`}>
+              {verdict.text}
+            </h2>
+            <p className={`text-sm mt-0.5 ${verdict.subTextColor}`}>
+              Forty Foot, Sandycove
+              {!sea && " · Sea data loading…"}
+            </p>
+          </div>
         </div>
+        <ShareCard
+          verdict={verdict}
+          temp={current.temperature}
+          windSpeed={current.windSpeed}
+          rainExpected={rain ? rain.rainExpected : false}
+          seaTemp={sea?.seaTemp}
+        />
       </div>
 
       {/* Breakdown grid */}

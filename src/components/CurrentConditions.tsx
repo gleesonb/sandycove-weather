@@ -110,6 +110,11 @@ export default function CurrentConditions() {
           sub={`${c.rainTotal.toFixed(1)} mm today`}
         />
         <StatCard label="UV Index" value={c.uv.toString()} sub={uvLabel(c.uv)} />
+        <StatCard
+          label="Visibility"
+          value={c.visibility >= 10000 ? ">10 km" : `${(c.visibility / 1000).toFixed(1)} km`}
+          sub={visibilityLabel(c.visibility)}
+        />
         <StatCard label="Solar" value={`${c.solarRadiation} W/m²`} />
         {todayForecast?.sunrise && (
           <StatCard label="Sunrise" value={formatTime(todayForecast.sunrise)} />
@@ -146,4 +151,12 @@ function uvLabel(uv: number): string {
   if (uv <= 7) return "High";
   if (uv <= 10) return "Very High";
   return "Extreme";
+}
+
+function visibilityLabel(visibility: number): string {
+  if (visibility >= 10000) return "Excellent";
+  if (visibility >= 5000) return "Good";
+  if (visibility >= 2000) return "Moderate";
+  if (visibility >= 1000) return "Poor";
+  return "Fog";
 }

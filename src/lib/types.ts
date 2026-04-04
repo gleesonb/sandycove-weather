@@ -22,6 +22,7 @@ export interface CurrentConditions {
   rainTotal: number;
   uv: number;
   solarRadiation: number;
+  visibility: number; // in meters
   lastUpdated: string;
   stationOnline: boolean;
 }
@@ -50,6 +51,7 @@ export interface ForecastHour {
   windDirection: string;
   precipitation: number;
   precipProbability: number;
+  uv: number;
   description: string;
   icon: string;
 }

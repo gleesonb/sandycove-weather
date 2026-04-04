@@ -29,6 +29,14 @@ function formatTime(timestamp: string): string {
   });
 }
 
+function uvColor(uv: number): string {
+  if (uv <= 2) return "text-green-600 dark:text-green-400";
+  if (uv <= 5) return "text-yellow-600 dark:text-yellow-400";
+  if (uv <= 7) return "text-orange-600 dark:text-orange-400";
+  if (uv <= 10) return "text-red-600 dark:text-red-400";
+  return "text-purple-600 dark:text-purple-400";
+}
+
 function LoadingSkeleton() {
   return (
     <div className="flex gap-3 overflow-x-auto pb-2">
@@ -106,6 +114,9 @@ export default function HourlyForecast() {
             </div>
             <div className="text-xs text-blue-600 dark:text-blue-400">
               {Math.round(hour.precipProbability)}%
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center justify-center gap-1">
+              <span className={uvColor(hour.uv)}>UV</span> {hour.uv > 0 && <span>{Math.round(hour.uv)}</span>}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">
               {Math.round(hour.windSpeed)} km/h
