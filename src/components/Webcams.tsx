@@ -5,7 +5,7 @@ const WEBCAMS = [
     id: "east-pier",
     name: "Dun Laoghaire & East Pier",
     description: "North across Dublin Bay towards Howth",
-    snapshot: "https://s55.ipcamlive.com/streams/37ugmsin5q2jvpdiq/snapshot.jpg",
+    snapshot: "https://s55.ipcamlive.com/streams/37l7ovc0sqtejidu3/snapshot.jpg",
     playerUrl: "https://g0.ipcamlive.com/player/player.php?alias=5d933014c3f12",
   },
   {
@@ -28,6 +28,7 @@ export default function Webcams() {
   const [selected, setSelected] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
   const [errored, setErrored] = useState<Set<string>>(new Set());
+  const [showLive, setShowLive] = useState(false);
 
   // Refresh snapshots every 15s
   useEffect(() => {
@@ -68,10 +69,9 @@ export default function Webcams() {
                 loading="lazy"
                 onError={() => handleImageError(c.id)}
                 onLoad={() => handleImageLoad(c.id)}
-                style={{ display: errored.has(c.id) ? "none" : "block" }}
               />
               {errored.has(c.id) && (
-                <div className="absolute inset-0 flex items-center justify-center text-ocean-400/40 dark:text-ocean-600/40 text-3xl pointer-events-none">
+                <div className="absolute inset-0 flex items-center justify-center bg-ocean-100 dark:bg-ocean-900 text-ocean-400/40 dark:text-ocean-600/40 text-3xl pointer-events-none">
                   Offline
                 </div>
               )}
@@ -92,41 +92,49 @@ export default function Webcams() {
         ))}
       </div>
 
-      {/* Expanded view — larger snapshot + link to live stream */}
+      {/* Expanded view — larger snapshot + live stream */}
       {cam && (
         <div className="card overflow-hidden">
           <div className="relative aspect-video bg-ocean-100 dark:bg-ocean-900 overflow-hidden">
-            <img
-              src={`${cam.snapshot}?t=${tick}`}
-              alt={cam.name}
-              className="w-full h-full object-cover"
-              onError={() => handleImageError(cam.id)}
-              onLoad={() => handleImageLoad(cam.id)}
-              style={{ display: errored.has(cam.id) ? "none" : "block" }}
-            />
-            {errored.has(cam.id) && (
-              <div className="absolute inset-0 flex items-center justify-center text-ocean-400/30 text-4xl pointer-events-none">
-                Offline
-              </div>
+            {showLive ? (
+              <iframe
+                src={cam.playerUrl}
+                className="w-full h-full border-0"
+                allow="autoplay; fullscreen"
+                title={`${cam.name} live stream`}
+              />
+            ) : (
+              <>
+                <img
+                  src={`${cam.snapshot}?t=${tick}`}
+                  alt={cam.name}
+                  className="w-full h-full object-cover"
+                  onError={() => handleImageError(cam.id)}
+                  onLoad={() => handleImageLoad(cam.id)}
+                />
+                {errored.has(cam.id) && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-ocean-100 dark:bg-ocean-900 text-ocean-400/30 text-4xl pointer-events-none">
+                    Offline
+                  </div>
+                )}
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-full px-2.5 py-1">
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-xs font-medium text-white uppercase tracking-wider">Live — refreshes every 15s</span>
+                </div>
+              </>
             )}
-            <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-full px-2.5 py-1">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-xs font-medium text-white uppercase tracking-wider">Live — refreshes every 15s</span>
-            </div>
           </div>
           <div className="px-4 py-3 flex items-center justify-between border-t border-ocean-100/50 dark:border-white/[0.06]">
             <div>
               <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{cam.name}</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">{cam.description}</div>
             </div>
-            <a
-              href={cam.playerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs font-medium text-ocean-600 dark:text-ocean-400 hover:underline whitespace-nowrap"
+            <button
+              onClick={() => setShowLive(!showLive)}
+              className="text-xs font-medium text-ocean-600 dark:text-ocean-400 hover:underline whitespace-nowrap cursor-pointer"
             >
-              Watch live stream ↗
-            </a>
+              {showLive ? "Back to snapshot" : "Watch live stream"}
+            </button>
           </div>
         </div>
       )}

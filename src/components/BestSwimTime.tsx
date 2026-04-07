@@ -1,13 +1,34 @@
 import { useQuery } from "@tanstack/react-query";
-import type { ApiResponse, ForecastHour } from "@/lib/types";
+import type { ApiResponse, ForecastHour, SeaConditions, TideEvent } from "@/lib/types";
 
 interface SwimScore {
   hour: ForecastHour;
   score: number;
   reason: string;
+  tideLabel?: string;
 }
 
-function scoreSwimConditions(hour: ForecastHour): SwimScore {
+/** Cosine interpolation between tide points (same method as TideGraph) */
+function estimateTideHeight(tides: TideEvent[], timestamp: string): number {
+  const sorted = [...tides].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+  const time = new Date(timestamp).getTime();
+
+  const prev = [...sorted].reverse().find((t) => new Date(t.time).getTime() <= time);
+  const next = sorted.find((t) => new Date(t.time).getTime() > time);
+
+  if (prev && next) {
+    const prevTime = new Date(prev.time).getTime();
+    const nextTime = new Date(next.time).getTime();
+    const progress = (time - prevTime) / (nextTime - prevTime);
+    const cosValue = (1 - Math.cos(progress * Math.PI)) / 2;
+    return prev.height + (next.height - prev.height) * cosValue;
+  }
+  if (prev) return prev.height;
+  if (next) return next.height;
+  return 1.5; // fallback mid-range
+}
+
+function scoreSwimConditions(hour: ForecastHour, tides?: TideEvent[]): SwimScore {
   let score = 100;
   const reasons: string[] = [];
 
@@ -51,12 +72,43 @@ function scoreSwimConditions(hour: ForecastHour): SwimScore {
     score += 10; // Daylight bonus
   }
 
+  // Tide — strong bias for higher tides
+  let tideLabel: string | undefined;
+  if (tides && tides.length >= 2) {
+    const height = estimateTideHeight(tides, hour.timestamp);
+    // Find the range of tide heights today
+    const heights = tides.map((t) => t.height);
+    const minH = Math.min(...heights);
+    const maxH = Math.max(...heights);
+    const range = maxH - minH;
+
+    if (range > 0) {
+      // Normalize to 0-1 where 1 = highest tide
+      const normalized = (height - minH) / range;
+
+      // Strong bias: up to +50 at high tide, -30 at low tide
+      // This uses a squared curve to make high tide even more attractive
+      const tideBonus = Math.round(normalized * normalized * 80 - 30);
+      score += tideBonus;
+
+      if (normalized > 0.8) {
+        tideLabel = "High tide";
+      } else if (normalized > 0.5) {
+        tideLabel = "Tide coming in";
+      } else if (normalized < 0.2) {
+        tideLabel = "Low tide";
+        reasons.push("Low tide");
+      }
+    }
+  }
+
   const reasonText = reasons.length > 0 ? reasons.join(" · ") : "Great conditions";
 
   return {
     hour,
     score: Math.max(0, Math.min(100, score)),
     reason: reasonText,
+    tideLabel,
   };
 }
 
@@ -83,6 +135,12 @@ export default function BestSwimTime() {
     refetchInterval: 30 * 60 * 1000,
   });
 
+  const { data: seaData } = useQuery<ApiResponse<SeaConditions>>({
+    queryKey: ["sea"],
+    queryFn: () => fetch("/api/sea").then((r) => r.json()),
+    refetchInterval: 30 * 60 * 1000,
+  });
+
   if (isLoading) {
     return (
       <div className="card p-4 animate-pulse">
@@ -93,6 +151,7 @@ export default function BestSwimTime() {
 
   if (!data?.data) return null;
 
+  const tides = seaData?.data?.tides;
   const now = new Date();
   const todayEnd = new Date(now);
   todayEnd.setHours(23, 59, 59, 999);
@@ -103,7 +162,7 @@ export default function BestSwimTime() {
       const hTime = new Date(h.timestamp);
       return hTime >= now && hTime <= todayEnd;
     })
-    .map(scoreSwimConditions)
+    .map((h) => scoreSwimConditions(h, tides))
     .sort((a, b) => b.score - a.score)
     .slice(0, 3);
 
@@ -129,6 +188,11 @@ export default function BestSwimTime() {
             <span className="text-sm text-gray-600 dark:text-gray-400">
               · {best.reason}
             </span>
+            {best.tideLabel && (
+              <span className="text-sm text-ocean-600/70 dark:text-ocean-400/60">
+                · {best.tideLabel}
+              </span>
+            )}
           </div>
           {scored.length > 1 && (
             <div className="flex gap-3 mt-2 text-xs text-gray-500 dark:text-gray-500">

@@ -119,16 +119,14 @@ export default function TideGraph() {
   const maxHeight = Math.max(...points.map((p) => p.height));
   const minHeight = Math.min(...points.map((p) => p.height));
 
-  // Format for X-axis
+  // Format for X-axis — show time at regular intervals
   const tickFormatter = (timestamp: string) => {
     const date = new Date(timestamp);
-    const hours = date.getHours();
-    if (hours === 0 || hours % 6 === 0) {
-      return date.toLocaleDateString("en-IE", {
-        hour: "2-digit",
-        hour12: false,
-        timeZone: "Europe/Dublin",
-      });
+    const h = date.getHours();
+    const m = date.getMinutes();
+    // Show labels every 3 hours (midnight, 3, 6, 9, 12, 15, 18, 21)
+    if (h % 3 === 0 && m === 0) {
+      return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
     }
     return "";
   };
@@ -179,10 +177,10 @@ export default function TideGraph() {
             <XAxis
               dataKey="time"
               tickFormatter={tickFormatter}
-              tick={{ fill: "#9ca3af", fontSize: 10 }}
-              stroke="#9ca3af"
+              tick={{ fill: "#9ca3af", fontSize: 11 }}
+              stroke="#d1d5db"
               className="text-gray-400 dark:text-gray-600"
-              interval={6}
+              interval={11}
             />
             <YAxis
               domain={[minHeight - 0.5, maxHeight + 0.5]}
@@ -203,18 +201,22 @@ export default function TideGraph() {
         </ResponsiveContainer>
 
         {/* Tide markers */}
-        <div className="flex gap-4 mt-3 text-xs">
-          {sortedTides.slice(0, 4).map((tide) => (
-            <div key={tide.time} className="flex items-center gap-1.5">
-              <span>{tide.type === "high" ? "🔼" : "🔽"}</span>
-              <span className="text-gray-600 dark:text-gray-400">
-                {formatTime(tide.time)}
-              </span>
-              <span className="text-gray-500 dark:text-gray-500">
-                {tide.height.toFixed(1)}m
-              </span>
-            </div>
-          ))}
+        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-xs">
+          {sortedTides.slice(0, 6).map((tide, i) => {
+            const showDate = i === 0 || formatDate(tide.time) !== formatDate(sortedTides[i - 1].time);
+            return (
+              <div key={tide.time} className="flex items-center gap-1.5">
+                <span>{tide.type === "high" ? "🔼" : "🔽"}</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  {showDate && <span className="text-gray-400 dark:text-gray-500">{formatDate(tide.time)} </span>}
+                  {formatTime(tide.time)}
+                </span>
+                <span className="text-gray-500 dark:text-gray-500 tabular-nums">
+                  {tide.height.toFixed(1)}m
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -25,11 +25,15 @@ dist/
 build/
 .astro/
 .wrangler/
+.next/
 *.pyc
 __pycache__/
 node_modules/
 .venv/
 venv/
+next-env.d.ts
+package-lock.json
 
 # Local AI agent settings
 .claude/settings.local.json
+.envrc

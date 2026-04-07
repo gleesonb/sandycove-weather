@@ -43,10 +43,10 @@ Interactive Recharts graphs for the current day: temperature curve, wind speed a
 Sea surface temperature, wave height, wave period, and wave direction from Open-Meteo marine data. Dublin Port tide times (high and low) sourced from Marine Institute Ireland's ERDDAP API — showing today and tomorrow's tides (up to 8 tide events).
 
 ### Time for a Swim?
-A swim suitability indicator for the Forty Foot based on sea temp, wind, rain, wave height, tide state, and UV index. Includes smart tide scoring that rewards high tide conditions (the Forty Foot is best enjoyed at high water) and penalties for low tide, heavy rain, or rough waves. Displays a clear verdict — from "Perfect for a swim!" to "Best to stay dry" — with a detailed breakdown of each factor.
+A swim suitability indicator for the Forty Foot based on sea temp, wind, rain, wave height, tide state, and UV index. Includes smart tide scoring that rewards high tide conditions (the Forty Foot is best enjoyed at high water) and penalties for low tide, heavy rain, or rough waves. Displays a clear verdict — from "Perfect for a swim!" to "Best to stay dry" — with a detailed breakdown of each factor. A "Best time for a swim today" card highlights the top 3 hours, strongly biased toward high tide using cosine-interpolated tide height estimates.
 
 ### Webcams
-Three live webcam feeds from Sandycove and Dun Laoghaire harbour with auto-refreshing snapshots, so you can see conditions with your own eyes before making the trip.
+Three live webcam feeds from Sandycove and Dun Laoghaire harbour with auto-refreshing snapshots (every 15 seconds), so you can see conditions with your own eyes before making the trip. The expanded view offers an embedded live stream player via IPCamLive. Cameras that go offline are detected automatically via image load errors.
 
 ### Historical Explorer
 Collapsible section with historical weather data:
