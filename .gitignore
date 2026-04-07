@@ -36,4 +36,8 @@ package-lock.json
 
 # Local AI agent settings
 .claude/settings.local.json
+.claude/.worker-tracking/
 .envrc
+
+# Issue tracking (local only)
+.beads/
