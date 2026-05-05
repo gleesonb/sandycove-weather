@@ -159,9 +159,14 @@ export function computeDailySummary(
   const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
   const avg = (arr: number[]) => (arr.length > 0 ? sum(arr) / arr.length : 0);
 
-  // Rain total: take the max rain_total value (cumulative) from observations
+  // Rain total: prefer max of cumulative rainTotal, fall back to summing rainRate
+  // WU history API sometimes reports precipTotal=0 even when precipRate>0
   const rainTotals = observations.map((o) => o.rainTotal);
   const maxRainTotal = Math.max(...rainTotals);
+  const rainRateSum = sum(observations.map((o) => o.rainRate));
+  // Observations are ~5min apart; rainRate is mm/h so scale by 5/60
+  const rainRateDerived = rainRateSum * (5 / 60);
+  const rainTotal = maxRainTotal > 0 ? maxRainTotal : rainRateDerived;
 
   return {
     date,
@@ -171,7 +176,7 @@ export function computeDailySummary(
     humidityAvg: Math.round(avg(humidities) * 10) / 10,
     windMax: Math.round(Math.max(...winds) * 10) / 10,
     gustMax: Math.round(Math.max(...gusts) * 10) / 10,
-    rainTotal: Math.round(maxRainTotal * 10) / 10,
+    rainTotal: Math.round(rainTotal * 10) / 10,
     pressureAvg: Math.round(avg(pressures) * 10) / 10,
   };
 }

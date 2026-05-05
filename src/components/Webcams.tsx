@@ -5,13 +5,13 @@ const WEBCAMS = [
     id: "east-pier",
     name: "Dun Laoghaire & East Pier",
     description: "North across Dublin Bay towards Howth",
-    snapshot: "https://s55.ipcamlive.com/streams/37l7ovc0sqtejidu3/snapshot.jpg",
+    snapshot: "https://s121.ipcamlive.com/streams/79wiyfrepdlosusb4/snapshot.jpg",
   },
   {
     id: "anchorage",
     name: "Dublin Bay Ship Anchorage",
     description: "Northeast over the shipping lane",
-    snapshot: "https://s21.ipcamlive.com/streams/15k736ytjdrhqirvo/snapshot.jpg",
+    snapshot: "https://s21.ipcamlive.com/streams/15zseqjw6okpyer1u/snapshot.jpg",
   },
   {
     id: "forty-foot",
