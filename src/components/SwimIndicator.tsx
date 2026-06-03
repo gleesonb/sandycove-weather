@@ -298,6 +298,14 @@ export default function SwimIndicator() {
           windSpeed={current.windSpeed}
           rainExpected={rain ? rain.rainExpected : false}
           seaTemp={sea?.seaTemp}
+          tideInfo={(() => {
+            if (!sea?.tides?.length) return undefined;
+            const now = Date.now();
+            const next = sea.tides.find((t) => new Date(t.time).getTime() > now);
+            if (!next) return undefined;
+            const time = new Date(next.time).toLocaleTimeString("en-IE", { timeZone: "Europe/Dublin", hour: "2-digit", minute: "2-digit" });
+            return `Next ${next.type === "high" ? "high" : "low"} tide ${time}`;
+          })()}
         />
       </div>
 
