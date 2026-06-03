@@ -13,12 +13,6 @@ const WEBCAMS = [
     description: "Northeast over the shipping lane",
     snapshot: "https://s21.ipcamlive.com/streams/15z9k7ir1bsglmmvz/snapshot.jpg",
   },
-  {
-    id: "forty-foot",
-    name: "Sandycove & Forty Foot",
-    description: "South towards the Forty Foot & Martello Tower",
-    snapshot: "https://s44.ipcamlive.com/streams/6008744a58a63/snapshot.jpg",
-  },
 ];
 
 export default function Webcams() {
@@ -48,7 +42,7 @@ export default function Webcams() {
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {WEBCAMS.map((c) => (
           <button
             key={c.id}
