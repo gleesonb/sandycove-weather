@@ -6,6 +6,7 @@ import type {
   SeaConditions,
   ForecastHour,
   ForecastDay,
+  TideEvent,
 } from "@/lib/types";
 import ShareCard from "./ShareCard";
 
@@ -130,6 +131,72 @@ function getVerdict(score: number): Verdict {
     subTextColor: "text-red-700/70 dark:text-red-300/60",
     emoji: "🌊",
   };
+}
+
+// --- Best swim time (same scoring as BestSwimTime.tsx) ---
+
+function estimateTideHeight(tides: TideEvent[], timestamp: string): number {
+  const sorted = [...tides].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+  const time = new Date(timestamp).getTime();
+  const prev = [...sorted].reverse().find((t) => new Date(t.time).getTime() <= time);
+  const next = sorted.find((t) => new Date(t.time).getTime() > time);
+  if (prev && next) {
+    const progress = (time - new Date(prev.time).getTime()) / (new Date(next.time).getTime() - new Date(prev.time).getTime());
+    return prev.height + (next.height - prev.height) * (1 - Math.cos(progress * Math.PI)) / 2;
+  }
+  return prev?.height ?? next?.height ?? 1.5;
+}
+
+function findBestSwimTime(
+  hourly: ForecastHour[],
+  tides?: TideEvent[],
+): string | undefined {
+  const now = new Date();
+  const todayEnd = new Date(now);
+  todayEnd.setHours(23, 59, 59, 999);
+
+  const scored = hourly
+    .filter((h) => {
+      const t = new Date(h.timestamp);
+      return t >= now && t <= todayEnd;
+    })
+    .map((h) => {
+      let score = 100;
+      if (h.feelsLike >= 15) score += 10;
+      else if (h.feelsLike >= 10) score += 5;
+      else if (h.feelsLike < 5) score -= 15;
+
+      if (h.windSpeed < 10) score += 15;
+      else if (h.windSpeed < 20) score += 5;
+      else if (h.windSpeed >= 30) score -= 20;
+
+      if (h.precipitation === 0 && h.precipProbability < 20) score += 20;
+      else if (h.precipProbability >= 50) score -= 25;
+
+      const hourNum = new Date(h.timestamp).getHours();
+      if (hourNum >= 6 && hourNum <= 20) score += 10;
+
+      if (tides && tides.length >= 2) {
+        const height = estimateTideHeight(tides, h.timestamp);
+        const heights = tides.map((t) => t.height);
+        const range = Math.max(...heights) - Math.min(...heights);
+        if (range > 0) {
+          const normalized = (height - Math.min(...heights)) / range;
+          score += Math.round(normalized * normalized * 80 - 30);
+        }
+      }
+
+      return { hour: h, score: Math.max(0, Math.min(100, score)) };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  if (scored.length === 0) return undefined;
+  return new Date(scored[0].hour.timestamp).toLocaleTimeString("en-IE", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Europe/Dublin",
+  });
 }
 
 // --- Component ---
@@ -306,6 +373,7 @@ export default function SwimIndicator() {
             const time = new Date(next.time).toLocaleTimeString("en-IE", { timeZone: "Europe/Dublin", hour: "2-digit", minute: "2-digit" });
             return `Next ${next.type === "high" ? "high" : "low"} tide ${time}`;
           })()}
+          bestSwimTime={_forecast ? findBestSwimTime(_forecast.hourly, sea?.tides) : undefined}
         />
       </div>
 

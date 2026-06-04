@@ -7,9 +7,10 @@ interface ShareCardProps {
   rainExpected: boolean;
   seaTemp?: number;
   tideInfo?: string;
+  bestSwimTime?: string;
 }
 
-export default function ShareCard({ verdict, temp, windSpeed, rainExpected, seaTemp, tideInfo }: ShareCardProps) {
+export default function ShareCard({ verdict, temp, windSpeed, rainExpected, seaTemp, tideInfo, bestSwimTime }: ShareCardProps) {
   const [copied, setCopied] = useState(false);
 
   const shareText = `${verdict.emoji} ${verdict.text}
@@ -17,7 +18,7 @@ export default function ShareCard({ verdict, temp, windSpeed, rainExpected, seaT
 📍 Forty Foot, Sandycove
 🌡️ ${temp.toFixed(1)}°C · ${seaTemp ? `Sea ${seaTemp.toFixed(1)}°C` : ""}
 💨 ${windSpeed.toFixed(0)} km/h
-🌧️ ${rainExpected ? "Rain expected" : "Dry skies"}${tideInfo ? `\n🌊 ${tideInfo}` : ""}
+🌧️ ${rainExpected ? "Rain expected" : "Dry skies"}${tideInfo ? `\n🌊 ${tideInfo}` : ""}${bestSwimTime ? `\n🏊 Best swim today: ${bestSwimTime}` : ""}
 
 weather.billgleeson.com`;
 
