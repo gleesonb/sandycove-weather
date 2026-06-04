@@ -5,13 +5,11 @@ const WEBCAMS = [
     id: "east-pier",
     name: "Dun Laoghaire & East Pier",
     description: "North across Dublin Bay towards Howth",
-    snapshot: "https://s121.ipcamlive.com/streams/79rstpb7jk9u814bi/snapshot.jpg",
   },
   {
     id: "anchorage",
     name: "Dublin Bay Ship Anchorage",
     description: "Northeast over the shipping lane",
-    snapshot: "https://s21.ipcamlive.com/streams/15z9k7ir1bsglmmvz/snapshot.jpg",
   },
 ];
 
@@ -53,7 +51,7 @@ export default function Webcams() {
           >
             <div className="relative aspect-video bg-ocean-100 dark:bg-ocean-900 overflow-hidden">
               <img
-                src={`${c.snapshot}?t=${tick}`}
+                src={`/api/webcam/${c.id}?t=${tick}`}
                 alt={c.name}
                 className="w-full h-full object-cover"
                 loading="lazy"
@@ -87,7 +85,7 @@ export default function Webcams() {
         <div className="card overflow-hidden">
           <div className="relative aspect-video bg-ocean-100 dark:bg-ocean-900 overflow-hidden">
             <img
-              src={`${cam.snapshot}?t=${tick}`}
+              src={`/api/webcam/${cam.id}?t=${tick}`}
               alt={cam.name}
               className="w-full h-full object-cover"
               onError={() => handleImageError(cam.id)}
