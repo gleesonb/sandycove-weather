@@ -4,7 +4,7 @@
 
 ### Live weather dashboard for Sandycove, Dublin, Ireland
 
-**[weather.billgleeson.com](https://weather.billgleeson.com)**
+**[sandycove.app](https://sandycove.app)** — also at [weather.billgleeson.com](https://weather.billgleeson.com)
 
 [![Astro](https://img.shields.io/badge/Astro_6-FF5D01?logo=astro&logoColor=white)](https://astro.build)
 [![React](https://img.shields.io/badge/React_19-61DAFB?logo=react&logoColor=black)](https://react.dev)

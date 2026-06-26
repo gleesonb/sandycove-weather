@@ -20,7 +20,7 @@ export default function ShareCard({ verdict, temp, windSpeed, rainExpected, seaT
 💨 ${windSpeed.toFixed(0)} km/h
 🌧️ ${rainExpected ? "Rain expected" : "Dry skies"}${tideInfo ? `\n🌊 ${tideInfo}` : ""}${bestSwimTime ? `\n🏊 Best swim today: ${bestSwimTime}` : ""}
 
-weather.billgleeson.com`;
+sandycove.app`;
 
   async function handleShare() {
     if (navigator.share) {
@@ -28,7 +28,7 @@ weather.billgleeson.com`;
         await navigator.share({
           title: `${verdict.emoji} Sandycove Weather`,
           text: shareText,
-          url: "https://weather.billgleeson.com",
+          url: "https://sandycove.app",
         });
       } catch {
         // User cancelled
