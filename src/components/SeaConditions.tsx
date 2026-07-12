@@ -81,6 +81,11 @@ export default function SeaConditions() {
           {sea.seaTemp.toFixed(1)}
           <span className="text-2xl sm:text-3xl text-ocean-400 dark:text-ocean-400 ml-0.5">°C</span>
         </div>
+        <div className="text-[11px] mt-2 text-gray-400 dark:text-gray-500">
+          {sea.seaTempSource === "dublin-bay-buoy"
+            ? "Live · Dublin Bay Buoy (Irish Lights MetOcean)"
+            : "Model estimate · Open-Meteo Marine"}
+        </div>
       </div>
 
       {/* Stats grid */}

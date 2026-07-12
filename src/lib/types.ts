@@ -122,6 +122,8 @@ export interface SeaConditions {
   wavePeriod: number;
   waveDirection: number;
   tides: TideEvent[];
+  /** Which source the sea temp/waves came from: "dublin-bay-buoy" (in-situ) or "open-meteo-marine" (model fallback). */
+  seaTempSource?: string;
   fetchedAt: string;
 }
 

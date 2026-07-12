@@ -12,7 +12,7 @@ export const GET: APIRoute = async () => {
   try {
     const cached = await getCached(env.WEATHER_CACHE, cacheKey);
     if (cached) {
-      return apiResponse(cached.data, "open-meteo-marine", {
+      return apiResponse(cached.data, cached.data.seaTempSource ?? "open-meteo-marine", {
         fetchedAt: cached.fetchedAt,
         isStale: false,
       });
@@ -25,15 +25,17 @@ export const GET: APIRoute = async () => {
   try {
     const data = await fetchSeaConditions();
 
+    // Keep a backup copy for stale-while-error fallback.
     await setCache(env.WEATHER_CACHE, cacheKey, data, CACHE_TTL.sea);
+    await setCache(env.WEATHER_CACHE, `${cacheKey}:backup`, data, CACHE_TTL.sea * 24);
 
-    return apiResponse(data, "open-meteo-marine");
+    return apiResponse(data, data.seaTempSource ?? "open-meteo-marine");
   } catch (err) {
     // Try stale cache
     try {
       const stale = await getCached(env.WEATHER_CACHE, `${cacheKey}:backup`);
       if (stale) {
-        return apiResponse(stale.data, "open-meteo-marine", {
+        return apiResponse(stale.data, stale.data.seaTempSource ?? "open-meteo-marine", {
           fetchedAt: stale.fetchedAt,
           isStale: true,
         });

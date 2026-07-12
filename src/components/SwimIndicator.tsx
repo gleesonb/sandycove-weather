@@ -6,200 +6,9 @@ import type {
   SeaConditions,
   ForecastHour,
   ForecastDay,
-  TideEvent,
 } from "@/lib/types";
+import { scoreNow, findBestSwimTime, formatDublinTime } from "@/lib/swim-score";
 import ShareCard from "./ShareCard";
-
-// --- Scoring helpers ---
-
-function scoreSeaTemp(temp: number): { score: number; label: string } {
-  if (temp >= 12) return { score: 25, label: `${temp.toFixed(1)}°C — lovely` };
-  if (temp >= 10) return { score: 15, label: `${temp.toFixed(1)}°C — fresh` };
-  if (temp >= 8) return { score: 8, label: `${temp.toFixed(1)}°C — cold` };
-  return { score: 2, label: `${temp.toFixed(1)}°C — very cold` };
-}
-
-function scoreWind(speed: number): { score: number; label: string } {
-  if (speed < 15) return { score: 25, label: `${speed.toFixed(0)} km/h — calm` };
-  if (speed < 25) return { score: 15, label: `${speed.toFixed(0)} km/h — breezy` };
-  if (speed < 35) return { score: 8, label: `${speed.toFixed(0)} km/h — windy` };
-  return { score: 0, label: `${speed.toFixed(0)} km/h — stormy` };
-}
-
-function scoreRain(
-  rainRate: number,
-  rainExpected: boolean,
-  minutesToRain: number | null,
-): { score: number; label: string } {
-  if (rainRate > 0) return { score: -10, label: "Currently raining" };
-  if (!rainExpected) return { score: 25, label: "Dry skies" };
-  if (minutesToRain != null && minutesToRain > 60)
-    return { score: 20, label: `Rain in ~${minutesToRain} min` };
-  // Rain within the hour = 0 points
-  return { score: 0, label: "Rain expected soon" };
-}
-
-function scoreTide(tides: { type: "high" | "low"; time: string; height: number }[]): { bonus: number; label: string } {
-  if (!tides || tides.length === 0) return { bonus: 0, label: "No tide data" };
-  const now = Date.now();
-  // Find the two tides bracketing now (last past + next future)
-  const past = [...tides].reverse().find((t) => new Date(t.time).getTime() <= now);
-  const next = tides.find((t) => new Date(t.time).getTime() > now);
-  if (!past || !next) return { bonus: 0, label: "" };
-
-  const totalSpan = new Date(next.time).getTime() - new Date(past.time).getTime();
-  const elapsed = now - new Date(past.time).getTime();
-  const progress = totalSpan > 0 ? elapsed / totalSpan : 0.5;
-
-  // If we're near high tide (past=high, progress<0.3 OR next=high, progress>0.7) → bonus
-  // If we're near low tide → penalty
-  if (past.type === "high" && progress < 0.35) return { bonus: 10, label: "Near high tide" };
-  if (next.type === "high" && progress > 0.65) return { bonus: 10, label: "High tide approaching" };
-  if (past.type === "high" && progress < 0.55) return { bonus: 5, label: "Tide going out" };
-  if (next.type === "high" && progress > 0.45) return { bonus: 5, label: "Tide coming in" };
-  if (past.type === "low" && progress < 0.35) return { bonus: -10, label: "Near low tide" };
-  return { bonus: 0, label: "Mid-tide" };
-}
-
-function scoreWaves(height: number): { score: number; label: string } {
-  if (height < 0.3) return { score: 25, label: `${height.toFixed(1)}m — calm` };
-  if (height < 0.6) return { score: 18, label: `${height.toFixed(1)}m — moderate` };
-  if (height < 1.0) return { score: 8, label: `${height.toFixed(1)}m — choppy` };
-  if (height >= 2.0) return { score: -10, label: `${height.toFixed(1)}m — very rough` };
-  return { score: 0, label: `${height.toFixed(1)}m — rough` };
-}
-
-function getUVInfo(uv: number): { emoji: string; label: string; advice: string } {
-  if (uv <= 2) return { emoji: "☀️", label: `UV ${uv} - Low`, advice: "Safe" };
-  if (uv <= 5) return { emoji: "🌤️", label: `UV ${uv} - Moderate`, advice: "Use sunscreen" };
-  if (uv <= 7) return { emoji: "⚠️", label: `UV ${uv} - High`, advice: "Protection needed" };
-  if (uv <= 10) return { emoji: "🔴", label: `UV ${uv} - Very High`, advice: "Burn risk" };
-  return { emoji: "🚨", label: `UV ${uv} - Extreme`, advice: "Avoid midday sun" };
-}
-
-interface Verdict {
-  text: string;
-  bg: string;
-  border: string;
-  textColor: string;
-  subTextColor: string;
-  emoji: string;
-}
-
-function getVerdict(score: number): Verdict {
-  if (score >= 80)
-    return {
-      text: "Perfect for a swim!",
-      bg: "bg-emerald-50/80 dark:bg-emerald-950/30",
-      border: "border-emerald-200/60 dark:border-emerald-800/40",
-      textColor: "text-emerald-800 dark:text-emerald-200",
-      subTextColor: "text-emerald-700/70 dark:text-emerald-300/60",
-      emoji: "🏊",
-    };
-  if (score >= 60)
-    return {
-      text: "Good conditions",
-      bg: "bg-green-50/80 dark:bg-green-950/25",
-      border: "border-green-200/60 dark:border-green-800/40",
-      textColor: "text-green-800 dark:text-green-200",
-      subTextColor: "text-green-700/70 dark:text-green-300/60",
-      emoji: "👍",
-    };
-  if (score >= 40)
-    return {
-      text: "Possible, but check conditions",
-      bg: "bg-amber-50/80 dark:bg-amber-950/25",
-      border: "border-amber-200/60 dark:border-amber-700/40",
-      textColor: "text-amber-800 dark:text-amber-200",
-      subTextColor: "text-amber-700/70 dark:text-amber-300/60",
-      emoji: "🤔",
-    };
-  if (score >= 20)
-    return {
-      text: "Not ideal today",
-      bg: "bg-orange-50/80 dark:bg-orange-950/25",
-      border: "border-orange-200/60 dark:border-orange-800/40",
-      textColor: "text-orange-800 dark:text-orange-200",
-      subTextColor: "text-orange-700/70 dark:text-orange-300/60",
-      emoji: "😬",
-    };
-  return {
-    text: "Best to stay dry",
-    bg: "bg-red-50/80 dark:bg-red-950/25",
-    border: "border-red-200/60 dark:border-red-800/40",
-    textColor: "text-red-800 dark:text-red-200",
-    subTextColor: "text-red-700/70 dark:text-red-300/60",
-    emoji: "🌊",
-  };
-}
-
-// --- Best swim time (same scoring as BestSwimTime.tsx) ---
-
-function estimateTideHeight(tides: TideEvent[], timestamp: string): number {
-  const sorted = [...tides].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-  const time = new Date(timestamp).getTime();
-  const prev = [...sorted].reverse().find((t) => new Date(t.time).getTime() <= time);
-  const next = sorted.find((t) => new Date(t.time).getTime() > time);
-  if (prev && next) {
-    const progress = (time - new Date(prev.time).getTime()) / (new Date(next.time).getTime() - new Date(prev.time).getTime());
-    return prev.height + (next.height - prev.height) * (1 - Math.cos(progress * Math.PI)) / 2;
-  }
-  return prev?.height ?? next?.height ?? 1.5;
-}
-
-function findBestSwimTime(
-  hourly: ForecastHour[],
-  tides?: TideEvent[],
-): string | undefined {
-  const now = new Date();
-  const todayEnd = new Date(now);
-  todayEnd.setHours(23, 59, 59, 999);
-
-  const scored = hourly
-    .filter((h) => {
-      const t = new Date(h.timestamp);
-      return t >= now && t <= todayEnd;
-    })
-    .map((h) => {
-      let score = 100;
-      if (h.feelsLike >= 15) score += 10;
-      else if (h.feelsLike >= 10) score += 5;
-      else if (h.feelsLike < 5) score -= 15;
-
-      if (h.windSpeed < 10) score += 15;
-      else if (h.windSpeed < 20) score += 5;
-      else if (h.windSpeed >= 30) score -= 20;
-
-      if (h.precipitation === 0 && h.precipProbability < 20) score += 20;
-      else if (h.precipProbability >= 50) score -= 25;
-
-      const hourNum = new Date(h.timestamp).getHours();
-      if (hourNum >= 6 && hourNum <= 20) score += 10;
-
-      if (tides && tides.length >= 2) {
-        const height = estimateTideHeight(tides, h.timestamp);
-        const heights = tides.map((t) => t.height);
-        const range = Math.max(...heights) - Math.min(...heights);
-        if (range > 0) {
-          const normalized = (height - Math.min(...heights)) / range;
-          score += Math.round(normalized * normalized * 80 - 30);
-        }
-      }
-
-      return { hour: h, score: Math.max(0, Math.min(100, score)) };
-    })
-    .sort((a, b) => b.score - a.score);
-
-  if (scored.length === 0) return undefined;
-  return new Date(scored[0].hour.timestamp).toLocaleTimeString("en-IE", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Europe/Dublin",
-  });
-}
-
-// --- Component ---
 
 export default function SwimIndicator() {
   const { data: currentData } = useQuery<ApiResponse<CurrentConditions>>({
@@ -235,7 +44,7 @@ export default function SwimIndicator() {
   const current = currentData?.data;
   const sea = seaData?.data;
   const rain = rainData?.data;
-  const _forecast = forecastData?.data;
+  const forecast = forecastData?.data;
 
   // Need at least current conditions to show anything useful
   if (!current) {
@@ -251,95 +60,10 @@ export default function SwimIndicator() {
     );
   }
 
-  // Build scores from what's available
-  const windResult = scoreWind(current.windSpeed);
+  const { factors, verdict } = scoreNow({ current, sea, rain });
 
-  const rainResult = rain
-    ? scoreRain(current.rainRate, rain.rainExpected, rain.minutesToRain)
-    : current.rainRate > 0
-      ? { score: 0, label: "Currently raining" }
-      : { score: 20, label: "No rain data" };
-
-  const seaTempResult = sea ? scoreSeaTemp(sea.seaTemp) : null;
-  const waveResult = sea ? scoreWaves(sea.waveHeight) : null;
-
-  // Tide bonus (high tide preferred at the Forty Foot)
-  const tideResult = sea?.tides ? scoreTide(sea.tides) : null;
-
-  // Calculate total — scale to 100 even if sea data is missing
-  let totalScore: number;
-  if (seaTempResult && waveResult) {
-    totalScore = windResult.score + rainResult.score + seaTempResult.score + waveResult.score;
-    if (tideResult) totalScore = Math.min(100, Math.max(0, totalScore + tideResult.bonus));
-  } else {
-    // Only wind + rain available (max 50) — scale to 100
-    const partial = windResult.score + rainResult.score;
-    totalScore = Math.round((partial / 50) * 100);
-  }
-
-  const verdict = getVerdict(totalScore);
-
-  const breakdownItems: { emoji: string; label: string; detail: string }[] = [];
-
-  if (seaTempResult) {
-    breakdownItems.push({
-      emoji: "🌡️",
-      label: "Sea temp",
-      detail: seaTempResult.label,
-    });
-  }
-
-  breakdownItems.push({
-    emoji: "💨",
-    label: "Wind",
-    detail: windResult.label,
-  });
-
-  breakdownItems.push({
-    emoji: current.rainRate > 0 ? "🌧️" : "☀️",
-    label: "Rain",
-    detail: rainResult.label,
-  });
-
-  // UV index
-  const uvInfo = getUVInfo(current.uv);
-  breakdownItems.push({
-    emoji: uvInfo.emoji,
-    label: "UV Index",
-    detail: uvInfo.label,
-  });
-
-  if (waveResult) {
-    breakdownItems.push({
-      emoji: "🌊",
-      label: "Waves",
-      detail: waveResult.label,
-    });
-  }
-
-  // Tide state
-  if (sea?.tides && sea.tides.length > 0) {
-    const tideLabel = tideResult?.label || "Mid-tide";
-    const now = Date.now();
-    const nextTide = sea.tides.find((t) => new Date(t.time).getTime() > now);
-    const tideDetail = nextTide
-      ? `${tideLabel} · Next ${nextTide.type === "high" ? "high" : "low"} at ${new Date(nextTide.time).toLocaleTimeString("en-IE", { timeZone: "Europe/Dublin", hour: "2-digit", minute: "2-digit" })}`
-      : tideLabel;
-    const tideEmoji = tideLabel.includes("high") || tideLabel.includes("High")
-      ? "⬆️"
-      : tideLabel.includes("low") || tideLabel.includes("Low")
-        ? "⬇️"
-        : tideLabel.includes("coming") || tideLabel.includes("approaching")
-          ? "↗️"
-          : tideLabel.includes("going") || tideLabel.includes("out")
-            ? "↘️"
-            : "🌊";
-    breakdownItems.push({
-      emoji: tideEmoji,
-      label: "Tide",
-      detail: tideDetail,
-    });
-  }
+  // Best swim time today, for the share card.
+  const bestSwimToday = forecast ? findBestSwimTime(forecast.hourly, sea?.tides, 1)[0] : undefined;
 
   return (
     <div className={`card p-6 sm:p-8 ${verdict.bg} ${verdict.border}`}>
@@ -370,17 +94,17 @@ export default function SwimIndicator() {
             const now = Date.now();
             const next = sea.tides.find((t) => new Date(t.time).getTime() > now);
             if (!next) return undefined;
-            const time = new Date(next.time).toLocaleTimeString("en-IE", { timeZone: "Europe/Dublin", hour: "2-digit", minute: "2-digit" });
+            const time = formatDublinTime(next.time);
             return `Next ${next.type === "high" ? "high" : "low"} tide ${time}`;
           })()}
-          bestSwimTime={_forecast ? findBestSwimTime(_forecast.hourly, sea?.tides) : undefined}
+          bestSwimTime={bestSwimToday ? formatDublinTime(bestSwimToday.hour.timestamp) : undefined}
         />
       </div>
 
       {/* Breakdown grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {breakdownItems.map((item) => (
-          <div key={item.label} className="card p-3.5">
+        {factors.map((item) => (
+          <div key={item.key} className="card p-3.5">
             <div className="flex items-start gap-2">
               <span className="text-base mt-0.5 shrink-0" role="img" aria-hidden="true">
                 {item.emoji}
